@@ -94,6 +94,8 @@ const RATE_LIMIT = Number(process.env.RATE_LIMIT)
 const MARKETPLACE_WS_URL = "ws://localhost:8080";
 const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
 
+
+
 const OPENSEA_PROTOCOL_ADDRESS = "0x0000000000000068F116a894984e2DB1123eB395"
 const QUEUE_OPTIONS: QueueOptions = {
   connection: redis,
@@ -148,13 +150,11 @@ const worker = new Worker(
     // settings: {},
     connection: redis,
     concurrency: RATE_LIMIT * 1.5,
-    limiter: {
-      max: RATE_LIMIT,
-      duration: 1000
-    },
+    // limiter: {
+    //   max: RATE_LIMIT,
+    //   duration: 1000
+    // },
     maxStalledCount: 3,
-
-
   }
 );
 
@@ -284,12 +284,15 @@ async function cleanup() {
 process.on('SIGTERM', cleanup);
 process.on('SIGINT', cleanup);
 
+// Add this near the top with other global variables
+export const activeTasks: Map<string, ITask> = new Map();
+
+// Modify fetchCurrentTasks to populate activeTasks
 async function fetchCurrentTasks() {
   try {
     console.log(BLUE + '\n=== Fetching Current Tasks ===' + RESET);
     const tasks = await Task.find({}).lean().exec() as unknown as ITask[];
     const wallets = (await Wallet.find({}).lean()).map((wallet: any) => wallet.address);
-
 
     walletsArr.push(...wallets);
     const formattedTasks = tasks.map((task) => ({
@@ -297,6 +300,12 @@ async function fetchCurrentTasks() {
       _id: task._id.toString(),
       user: task.user.toString()
     }));
+
+    // Clear and populate activeTasks Map
+    activeTasks.clear();
+    formattedTasks.forEach(task => {
+      activeTasks.set(task._id, task);
+    });
 
     console.log(`Found ${formattedTasks.length} tasks`);
     currentTasks.push(...formattedTasks);
@@ -375,9 +384,15 @@ async function startServer() {
   }
 }
 
-startServer().catch(error => {
+startServer().then(() => {
+  connectWebSocket()
+})
+
+.catch(error => {
   console.error('Failed to start server:', error);
 });
+
+// connectWebSocket()
 
 wss.on('connection', (ws) => {
   console.log(GREEN + 'New WebSocket connection' + RESET);
@@ -416,8 +431,6 @@ wss.on('connection', (ws) => {
   };
 });
 
-
-connectWebSocket()
 
 async function processJob(job: Job) {
   switch (job.name) {
@@ -484,6 +497,9 @@ async function runScheduledLoop() {
         }
 
         if (isTaskLocked(taskId)) {
+
+          console.log({ taskId });
+
           continue;
         } else {
           const lockExists = taskLocks.has(taskId);
@@ -504,14 +520,11 @@ async function runScheduledLoop() {
   }
 }
 
+// setInterval(async () => {
+//   await runScheduledLoop();
+
+// }, 1000);
 // Start the scheduled loop
-(async function () {
-  try {
-    await runScheduledLoop();
-  } catch (error) {
-    console.error("Fatal error in scheduled loop:", error);
-  }
-})();
 
 function setTaskLock(taskId: string, duration: number = TASK_LOCK_DURATION): void {
   taskLocks.set(taskId, {
@@ -664,6 +677,10 @@ async function processNewTask(task: ITask) {
     console.log(BLUE + `\n=== Processing New Task ===` + RESET);
     console.log(`Collection: ${task.contract.slug}`);
     console.log(`Task ID: ${task._id}`);
+
+    // Add to activeTasks Map
+    activeTasks.set(task._id, task);
+
     currentTasks.push(task);
 
     console.log(GREEN + `Added task to currentTasks (Total: ${currentTasks.length})` + RESET);
@@ -689,6 +706,8 @@ async function processUpdatedTask(task: ITask) {
     const existingTaskIndex = currentTasks.findIndex(t => t._id === task._id);
     if (existingTaskIndex !== -1) {
       currentTasks.splice(existingTaskIndex, 1, task);
+      activeTasks.set(task._id, task);
+
       console.log(YELLOW + `Updated existing task: ${task.contract.slug}` + RESET);
       if (task.running) {
         await stopTask(task, false)
@@ -710,12 +729,19 @@ const taskLocks = new Map<string, { locked: boolean; lockUntil: number }>();
 
 async function startTask(task: ITask, start: boolean) {
   const taskId = task._id.toString();
+
+  console.log({ taskId });
   try {
     await removeTaskFromAborted(taskId);
-    const taskIndex = currentTasks.findIndex(t => t._id === task._id);
 
+    // Update activeTasks Map
+    const updatedTask = { ...task, running: true };
+    activeTasks.set(taskId, updatedTask);
+
+    // Update currentTasks array (existing logic)
+    const taskIndex = currentTasks.findIndex(t => t._id === task._id);
     if (taskIndex !== -1) {
-      currentTasks[taskIndex].running = start;
+      currentTasks[taskIndex].running = true;
     }
     console.log(GREEN + `Updated task ${task.contract.slug} running status to: ${start}`.toUpperCase() + RESET);
     if (task.outbidOptions.counterbid) {
@@ -752,6 +778,10 @@ async function stopTask(task: ITask, start: boolean, marketplace?: string) {
     if (!marketplace || task.selectedMarketplaces.length === 0) {
       markTaskAsAborted(taskId);
       releaseTaskLock(taskId)
+
+      // Update activeTasks Map
+      const updatedTask = { ...task, running: false };
+      activeTasks.set(taskId, updatedTask);
     }
 
     await queue.pause()
@@ -761,7 +791,7 @@ async function stopTask(task: ITask, start: boolean, marketplace?: string) {
     await removePendingAndWaitingBids(task, marketplace)
     await waitForRunningJobsToComplete(task, marketplace)
 
-    if (task.outbidOptions.counterbid) {
+    if (task.outbidOptions.counterbid && !marketplace) {
       try {
         await unsubscribeFromCollection(task);
       } catch (error) {
@@ -1090,15 +1120,18 @@ async function cancelBlurBids(bids: any[], privateKey: string, slug: string, tas
 async function updateStatus(task: ITask) {
   try {
     const { _id: taskId, running } = task;
-    const taskIndex = currentTasks.findIndex(task => task._id === taskId);
     const start = !running;
-    if (taskIndex !== -1) {
-      currentTasks[taskIndex].running = start;
-      if (start) {
-        await startTask(task, true)
-      } else {
-        await stopTask(task, false)
-      }
+
+    if (start) {
+      // Update activeTasks Map
+      const updatedTask = { ...task, running: true };
+      activeTasks.set(taskId, updatedTask);
+      await startTask(task, true);
+    } else {
+      // Update activeTasks Map
+      const updatedTask = { ...task, running: false };
+      activeTasks.set(taskId, updatedTask);
+      await stopTask(task, false);
     }
   } catch (error) {
     console.error(RED + `Error updating status for task: ${task._id}` + RESET, error);
@@ -1157,6 +1190,14 @@ async function updateMarketplace(task: ITask) {
       selectedMarketplaces: [...newMarketplaces]
     };
 
+    const updatedTask = {
+      ...currentTasks[taskIndex],
+      selectedMarketplaces: [...newMarketplaces]
+    };
+    currentTasks[taskIndex] = updatedTask;
+    activeTasks.set(taskId, updatedTask);
+
+
     if (outgoing) {
       await handleOutgoingMarketplace(outgoing, task);
     }
@@ -1191,15 +1232,6 @@ async function handleOutgoingMarketplace(marketplace: string, task: ITask) {
     await redis.del(countKey);
     const taskId = task._id
     releaseTaskLock(taskId)
-
-    // Check if counterbidding is enabled and unsubscribe from collection
-    if (task.outbidOptions?.counterbid) {
-      try {
-        await unsubscribeFromCollection(task);
-      } catch (error) {
-        console.error(RED + `Error unsubscribing from collection for task ${task.contract.slug}:` + RESET, error);
-      }
-    }
 
     await stopTask(task, false, marketplace);
 
@@ -1260,9 +1292,9 @@ function connectWebSocket(): void {
     }
 
     // Initial subscription
-    if (currentTasks.length === 0) {
-      await fetchCurrentTasks();
-    }
+    // if (currentTasks.length === 0) {
+    //   await fetchCurrentTasks();
+    // }
     await subscribeToCollections(currentTasks as unknown as ITask[]);
 
     // Set up reconnection check
@@ -1413,7 +1445,8 @@ async function handleMagicEdenCounterbid(data: any, task: ITask) {
     const selectedTraits = transformNewTask(task.selectedTraits)
 
     if (bidType === "token") {
-      const currentTask = currentTasks.find((task) => task._id === task._id)
+      const currentTask = activeTasks.get(task._id)
+
       if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes(MAGICEDEN.toLowerCase())) return
 
 
@@ -1636,6 +1669,7 @@ async function handleMagicEdenCounterbid(data: any, task: ITask) {
 async function handleOpenseaCounterbid(data: any, task: ITask) {
   try {
     const maker = data?.payload?.payload?.maker?.address.toLowerCase()
+
     const incomingBidAmount: number = Number(data?.payload?.payload?.base_price);
     const wallets = await (await Wallet.find({}, { address: 1, _id: 0 }).exec()).map((wallet) => wallet.address.toLowerCase())
 
@@ -1669,17 +1703,26 @@ async function handleOpenseaCounterbid(data: any, task: ITask) {
 
 
     if (data.event === "item_received_bid") {
-      const currentTask = currentTasks.find((task) => task._id === task._id)
-      if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes(MAGICEDEN.toLowerCase())) return
+      const currentTask = activeTasks.get(task._id)
+
+      if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes(OPENSEA.toLowerCase())) return
+
 
       const tokenId = +data.payload.payload.protocol_data.parameters.consideration.find((item: any) => item.token.toLowerCase() === task.contract.contractAddress.toLowerCase()).identifierOrCriteria
+
+      console.log({ tokenId });
+
+
       const tokenIds = task.tokenIds.filter(id => !isNaN(Number(id)));
 
       const tokenBid = task.bidType === "token" && task.tokenIds.length > 0
 
       if (!tokenBid) return
 
+
       if (!tokenIds.includes(tokenId)) return
+
+      console.log({ maker, incomingBidAmount, tokenId, tokenBid });
 
       console.log(BLUE + '---------------------------------------------------------------------------------' + RESET);
       console.log(BLUE + `incoming offer for ${task.contract.slug}:${tokenId} for ${incomingBidAmount / 1e18} WETH on opensea`.toUpperCase() + RESET);
@@ -2208,8 +2251,7 @@ async function processOpenseaScheduledBid(task: ITask) {
 
       console.log(`ADDED ${traitJobs.length} ${task.contract.slug} OPENSEA TRAIT BID JOBS TO QUEUE`);
     } else if (task.bidType.toLowerCase() === "collection" && !traitBid) {
-      const taskId = task._id
-      const currentTask = currentTasks.find((task) => task._id === taskId)
+      const currentTask = activeTasks.get(task._id)
 
       if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("opensea")) {
         console.log(RED + '⚠️ Task is no longer active or OpenSea not selected, skipping...' + RESET);
@@ -2393,9 +2435,7 @@ async function processBlurScheduledBid(task: ITask) {
 
       console.log(`ADDED ${traitJobs.length} ${task.contract.slug} BLUR TRAIT BID JOBS TO QUEUE`);
     } else if (task.bidType.toLowerCase() === "collection" && !traitBid) {
-
-      const taskId = task._id
-      const currentTask = currentTasks.find((task) => task._id === taskId)
+      const currentTask = activeTasks.get(task._id)
 
       if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("blur")) {
         console.log(RED + '⚠️ Task is no longer active or blur not selected, skipping...' + RESET);
@@ -2514,8 +2554,8 @@ async function processOpenseaTraitBid(data: {
   try {
     const { address, privateKey, slug, offerPrice, creatorFees, enforceCreatorFee, trait, expiry, outbidOptions, maxBidPriceEth, contractAddress, _id } = data
 
-    // Validate task is still active and OpenSea marketplace is selected
-    const currentTask = currentTasks.find((task) => task._id === _id)
+    const currentTask = activeTasks.get(_id)
+
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("opensea")) {
       console.log(RED + '⚠️ Task is no longer active or OpenSea not selected, skipping...' + RESET);
       return;
@@ -2647,8 +2687,7 @@ async function processOpenseaTraitBid(data: {
 async function processOpenseaTokenBid(data: IProcessOpenseaTokenBidData) {
   try {
     const { address, privateKey, slug, offerPrice, creatorFees, enforceCreatorFee, asset, expiry, outbidOptions, maxBidPriceEth, _id } = data
-    const currentTask = currentTasks.find((task) => task._id === _id)
-
+    const currentTask = activeTasks.get(_id)
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("opensea")) {
       console.log(RED + '⚠️ Task is no longer active or OpenSea not selected, skipping...' + RESET);
       return;
@@ -2768,7 +2807,7 @@ async function processOpenseaTokenBid(data: IProcessOpenseaTokenBidData) {
 async function openseaCollectionCounterBid(data: IOpenseaBidParams) {
   const { taskId, bidCount, walletAddress, walletPrivateKey, slug, offerPrice, creatorFees, enforceCreatorFee, expiry } = data
 
-  const currentTask = currentTasks.find((task) => task._id === taskId)
+  const currentTask = activeTasks.get(taskId)
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("opensea")) {
     return
   }
@@ -2805,7 +2844,7 @@ async function openseaCollectionCounterBid(data: IOpenseaBidParams) {
 
 async function magicedenCollectionCounterBid(data: IMagicedenCollectionBidData) {
   const { _id, bidCount, address, contractAddress, quantity, offerPrice, expiration, privateKey, slug } = data
-  const currentTask = currentTasks.find((task) => task._id === _id)
+  const currentTask = activeTasks.get(_id)
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("magiceden")) {
     return
   }
@@ -2834,7 +2873,8 @@ async function magicedenTraitCounterBid(data: IMagicedenTraitBidData) {
 
   const { taskId, bidCount, address, contractAddress, quantity, offerPrice, expiration, privateKey, slug, trait } = data
 
-  const currentTask = currentTasks.find((task) => task._id === taskId)
+  const currentTask = activeTasks.get(taskId)
+
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("magiceden")) {
     return
   }
@@ -2854,10 +2894,9 @@ async function magicedenTraitCounterBid(data: IMagicedenTraitBidData) {
 }
 
 async function blurCollectionCounterBid(data: IBlurBidData) {
-
   const { taskId, bidCount, address, privateKey, contractAddress, offerPrice, slug, expiry } = data
+  const currentTask = activeTasks.get(taskId)
 
-  const currentTask = currentTasks.find((task) => task._id === taskId)
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("blur")) {
     return
   }
@@ -2875,7 +2914,8 @@ async function blurCollectionCounterBid(data: IBlurBidData) {
 async function blurTraitCounterBid(data: BlurTraitCounterBid) {
   const { taskId, bidCount, address, privateKey, contractAddress, offerPrice, slug, expiry, trait } = data
 
-  const currentTask = currentTasks.find((task) => task._id === taskId)
+  const currentTask = activeTasks.get(taskId)
+
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("blur")) {
     return
   }
@@ -2913,7 +2953,7 @@ async function openseaTokenCounterBid(data: IProcessOpenseaTokenBidData) {
 
   } = data
 
-  const currentTask = currentTasks.find((task) => task._id === _id)
+  const currentTask = activeTasks.get(_id)
   if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("opensea")) {
 
     return
@@ -3000,7 +3040,8 @@ async function magicedenTokenCounterBid(data: IMagicedenTokenBidData) {
     const { _id, address, contractAddress, quantity, offerPrice, privateKey, slug, tokenId } = data
 
     // Validate task is running and marketplace is enabled
-    const currentTask = currentTasks.find((task) => task._id === _id)
+    const currentTask = activeTasks.get(_id)
+
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) =>
       market.toLowerCase()).includes("magiceden")) {
       return
@@ -3081,7 +3122,9 @@ async function processBlurTraitBid(data: {
 
     const bidCount = getIncrementedBidCount(BLUR, slug, _id)
 
-    const currentTask = currentTasks.find((task) => task._id === _id)
+    const currentTask = activeTasks.get(_id)
+
+
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("blur")) return
 
     await bidOnBlur(_id, bidCount, address, privateKey, contractAddress, collectionOffer, slug, expiry, trait);
@@ -3189,9 +3232,7 @@ async function processMagicedenScheduledBid(task: ITask) {
       console.log(`ADDED ${traitJobs.length} ${task.contract.slug} MAGICEDEN TRAIT BID JOBS TO QUEUE`);
     }
     else if (task.bidType.toLowerCase() === "collection" && !traitBid) {
-
-      const taskId = task._id
-      const currentTask = currentTasks.find((task) => task._id === taskId)
+      const currentTask = activeTasks.get(task._id)
 
       if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("magiceden")) {
         console.log(RED + '⚠️ Task is no longer active or magiceden not selected, skipping...' + RESET);
@@ -3300,7 +3341,8 @@ async function processMagicedenTokenBid(data: IMagicedenTokenBidData) {
         _id
       } = data
 
-    const currentTask = currentTasks.find((task) => task._id === _id)
+    const currentTask = activeTasks.get(_id)
+
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("magiceden")) {
       console.log(RED + '⚠️ Task is no longer active or magiceden not selected, skipping...' + RESET);
       return;
@@ -3405,7 +3447,8 @@ async function processMagicedenTraitBid(data: {
 
     const bidCount = getIncrementedBidCount(MAGICEDEN, slug, _id)
 
-    const currentTask = currentTasks.find((task) => task._id === _id)
+    const currentTask = activeTasks.get(_id)
+
     if (!currentTask?.running || !currentTask.selectedMarketplaces.map((market) => market.toLowerCase()).includes("magiceden")) return
 
     await bidOnMagiceden(_id, bidCount, address, contractAddress, quantity, offerPrice, privateKey, slug, trait)
