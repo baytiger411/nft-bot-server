@@ -579,11 +579,50 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
         })
       );
 
-      const offer = data?.orders?.filter((order) => order.source.domain === "magiceden.io")
+      const offer = data?.orders
 
       if (!offer?.length) return null
       return { amount: offer[0].price.amount.raw || 0, owner: offer[0].maker }
 
+    } else if (type === "TRAIT") {
+
+      const queryParams: QueryParams = {
+        includeQuantity: true,
+        includeLastSale: true,
+        excludeSpam: true,
+        excludeBurnt: true,
+        collection: contractAddress,
+        sortBy: 'floorAskPrice',
+        sortDirection: 'asc',
+        limit: 50,
+        includeAttributes: false,
+        excludeSources: ['nftx.io', 'sudoswap.xyz']
+      };
+
+      if (identifier && typeof identifier === 'object') {
+        queryParams[`attributes[${identifier.attributeKey}][]`] = identifier.attributeValue;
+      }
+
+      const { data } = await limiter.schedule(() =>
+        axiosInstance.get<MagicedenTraitTokenResponse>(
+          'https://api.nfttools.website/magiceden/v3/rtp/ethereum/tokens/v7',
+          {
+            params: queryParams,
+            headers: {
+              'content-type': 'application/json',
+              'X-NFT-API-Key': API_KEY
+            }
+          }
+        )
+      );
+
+      const offer = data?.tokens?.[0]
+      if (!offer) return null;
+
+      return {
+        amount: +(offer.token?.collection?.floorAskPrice?.amount?.raw || 0),
+        owner: offer.market?.floorAsk?.maker || ''
+      }
     }
   } catch (error: any) {
     console.log(error);
@@ -592,7 +631,7 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
 
 
 export async function fetchMagicEdenCollectionStats(contractAddress: string) {
-  const lockKey = `stats:${contractAddress}`;
+  const lockKey = `stats: ${contractAddress}`;
 
   return await lockManager.withLock(
     lockKey,
@@ -623,7 +662,7 @@ export async function fetchMagicEdenCollectionStats(contractAddress: string) {
 }
 
 export async function fetchMagicEdenTokens(collectionId: string, limit?: number) {
-  const lockKey = `tokens:${collectionId}`;
+  const lockKey = `tokens:${collectionId} `;
 
   return await lockManager.withLock(
     lockKey,
@@ -1120,5 +1159,119 @@ interface MagicedenCollectionOrder {
 
 interface MagicedenCollectionResponse {
   orders: MagicedenCollectionOrder[];
+  continuation: string;
+}
+
+interface QueryParams {
+  includeQuantity: boolean;
+  includeLastSale: boolean;
+  excludeSpam: boolean;
+  excludeBurnt: boolean;
+  collection: string;
+  sortBy: string;
+  sortDirection: string;
+  limit: number;
+  includeAttributes: boolean;
+  excludeSources: string[];
+  [key: string]: any; // This allows for dynamic keys
+}
+
+export interface MagicedenTraitToken {
+  chainId: number;
+  contract: string;
+  tokenId: string;
+  name: string;
+  description: string;
+  image: string;
+  imageSmall: string;
+  imageLarge: string;
+  metadata: {
+    imageOriginal: string;
+    imageMimeType: string;
+    tokenURI: string;
+  };
+  media: any; // Adjust type if you know the structure
+  kind: string;
+  isFlagged: boolean;
+  isSpam: boolean;
+  isNsfw: boolean;
+  metadataDisabled: boolean;
+  lastFlagUpdate: string;
+  lastFlagChange: string;
+  supply: string;
+  remainingSupply: string;
+  rarity: number;
+  rarityRank: number;
+  collection: {
+    id: string;
+    name: string;
+    image: string;
+    slug: string;
+    symbol: string;
+    creator: string;
+    tokenCount: number;
+    metadataDisabled: boolean;
+    floorAskPrice: {
+      currency: {
+        contract: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+      };
+      amount: {
+        raw: string;
+        decimal: number;
+        usd: number;
+        native: number;
+      };
+    };
+  };
+  owner: string;
+  mintedAt: string;
+  createdAt: string;
+  decimals: number | null;
+  mintStages: any[]; // Adjust type if you know the structure
+}
+
+export interface MagicedenTraitMarket {
+  floorAsk: {
+    id: string;
+    price: {
+      currency: {
+        contract: string;
+        name: string;
+        symbol: string;
+        decimals: number;
+      };
+      amount: {
+        raw: string;
+        decimal: number;
+        usd: number;
+        native: number;
+      };
+    };
+    maker: string;
+    validFrom: number;
+    validUntil: number;
+    source: {
+      id: string;
+      domain: string;
+      name: string;
+      icon: string;
+      url: string;
+    };
+  };
+}
+
+export interface MagicedenTraitTokenResponse {
+  tokens: {
+    token: MagicedenTraitToken;
+    market: MagicedenTraitMarket;
+    updatedAt: string;
+    media: {
+      image: string;
+      imageMimeType: string;
+    };
+  }[];
   continuation: string;
 }

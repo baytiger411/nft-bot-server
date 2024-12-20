@@ -71,8 +71,10 @@ export async function bidOnBlur(
     console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
 
     const jobs: Job[] = await queue.getJobs(['prioritized']);
-    const blurJobs = jobs.filter(job =>
-      [BLUR_SCHEDULE, BLUR_TRAIT_BID].includes(job.name)
+    const blurJobs = jobs.filter(job => {
+      if (!job || !job.name) return false
+      return [BLUR_SCHEDULE, BLUR_TRAIT_BID].includes(job?.name)
+    }
     );
 
     if (blurJobs.length > 0) {
