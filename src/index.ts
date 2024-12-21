@@ -703,13 +703,11 @@ function createJobKey(job: Job) {
 
 // Add near the top with other constants
 const BATCH_SEMAPHORE = new Set();
-const BATCH_INTERVAL = 200; // ms between batch processing
 
 // Add these constants near the top with other constants
 const INTER_BATCH_DELAY = 100; // ms between batch processing
 
 // Add these constants near the top with other constants
-const MAX_CONCURRENT_BATCHES = 2;
 const BATCH_DELAY = 500; // 500ms between batches
 const MAX_QUEUE_SIZE = Math.ceil(RATE_LIMIT * 1.5);
 
@@ -718,95 +716,146 @@ const MAX_ACTIVE_JOBS = WORKER_COUNT * RATE_LIMIT;
 const QUEUE_HIGH_WATERMARK = MAX_ACTIVE_JOBS * 1.5; // 150% of max desired active jobs
 const QUEUE_LOW_WATERMARK = MAX_ACTIVE_JOBS * 0.75; // 75% of max desired active jobs
 
+// Add these constants near the top with other constants
+const MEGA_BATCH_SIZE = 10000; // Process 10k jobs at a time
+const BATCH_SIZE = 1000; // Size of each smaller batch within a mega batch
+const BATCH_INTERVAL = 1000; // 1 second between batches
+const MEGA_BATCH_INTERVAL = 5000; // 5 seconds between mega batches
+const MAX_CONCURRENT_BATCHES = 5; // Maximum number of concurrent batch operations
+
+// Add these constants
+const MAX_MEMORY_USAGE = 75; // 75% of total memory
+const MAX_PRIORITIZED_JOBS = 1000;
+const DRAIN_THRESHOLD = 100;
+const RATE_LIMIT_PER_SECOND = 2;
+
 async function processBulkJobs(jobs: any[], createKey = false) {
-  if (!jobs || jobs.length === 0) {
-    return;
-  }
+  if (!jobs?.length) return;
 
-  const counts = await queue.getJobCounts();
-  const totalPrioritizedJobs = counts.prioritized || 0;
-  const totalInProgress = (counts.active || 0) + (counts.waiting || 0);
+  // Initialize rate limiter
+  const rateLimiter = new RateLimiter(RATE_LIMIT_PER_SECOND);
 
-  if (totalPrioritizedJobs > PRIORITIZED_THRESHOLD * 2) {
-    console.log(YELLOW + `Queue has too many prioritized jobs (${totalPrioritizedJobs}/${PRIORITIZED_THRESHOLD}). Pausing queue...` + RESET);
-    await queue.pause();
+  // Process in smaller chunks to prevent memory issues
+  const chunks = chunk(jobs, 100);
 
-    const checkQueueStatus = setInterval(async () => {
-      const currentCounts = await queue.getJobCounts();
-      const currentPrioritized = currentCounts.prioritized || 0;
+  for (const [chunkIndex, currentChunk] of chunks.entries()) {
+    try {
+      // Check memory usage
+      const memUsage = process.memoryUsage();
+      const memoryUsagePercent = (memUsage.heapUsed / os.totalmem()) * 100;
 
-      if (currentPrioritized <= PRIORITIZED_THRESHOLD / 2) {
-        await queue.resume();
-        console.log(GREEN + `Queue prioritized jobs reduced to ${currentPrioritized}. Resuming queue...` + RESET);
-        clearInterval(checkQueueStatus);
-      } else {
-        console.log(YELLOW + `Queue still has too many prioritized jobs (${currentPrioritized}). Waiting...` + RESET);
+      if (memoryUsagePercent > MAX_MEMORY_USAGE) {
+        console.log(YELLOW + `Memory usage high (${memoryUsagePercent.toFixed(1)}%). Waiting for GC...` + RESET);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        global.gc?.();
+        continue;
       }
-    }, 5000);
 
-    return;
-  }
+      // Check queue health
+      const counts = await queue.getJobCounts();
+      const prioritizedCount = counts.prioritized || 0;
 
-  if (totalInProgress > QUEUE_HIGH_WATERMARK) {
-    console.log(YELLOW + `Queue overloaded (${totalInProgress} jobs in progress, max desired: ${MAX_ACTIVE_JOBS}). Pausing queue...` + RESET);
-
-    const checkQueueStatus = setInterval(async () => {
-      const currentCounts = await queue.getJobCounts();
-      const currentTotal = (currentCounts.active || 0) + (currentCounts.waiting || 0);
-
-      if (currentTotal <= QUEUE_LOW_WATERMARK) {
-        console.log(GREEN + `Queue load reduced to ${currentTotal} jobs. Resuming queue...` + RESET);
-        clearInterval(checkQueueStatus);
-      } else {
-        console.log(YELLOW + `Queue still overloaded (${currentTotal} jobs). Waiting...` + RESET);
+      if (prioritizedCount > MAX_PRIORITIZED_JOBS) {
+        console.log(YELLOW + `Too many prioritized jobs (${prioritizedCount}). Waiting for queue to drain...` + RESET);
+        await waitForQueueDrain();
+        continue;
       }
-    }, 5000);
-  }
 
-  const availableCapacity = MAX_ACTIVE_JOBS - totalInProgress;
-
-  const currentBatch = jobs.slice(0, availableCapacity);
-  const remainingJobs = jobs.slice(availableCapacity);
-
-
-  const batches = [];
-  for (let i = 0; i < currentBatch.length; i += PRIORITIZED_THRESHOLD) {
-    batches.push(currentBatch.slice(i, i + PRIORITIZED_THRESHOLD));
-  }
-
-  const batchPromises = batches.map((batch, index) => {
-    return new Promise((resolve) => {
-      setTimeout(async () => {
-        try {
-          await queue.addBulk(
-            batch.map((job) => ({
+      // Process chunk with rate limiting
+      await Promise.all(
+        currentChunk.map(async (job) => {
+          await rateLimiter.acquire();
+          return queue.add(
+            job.name,
+            job.data,
+            {
               ...(createKey && { jobId: createJobKey(job) }),
-              name: job.name,
-              data: job.data,
-              opts: {
-                ...job.opts,
-                removeOnComplete: true,
-                removeOnFail: true,
-                timeout: 45000,
-              },
-            }))
+              ...job.opts,
+              removeOnComplete: true,
+              removeOnFail: true,
+              timeout: JOB_TIMEOUT,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 2000
+              }
+            }
           );
-          console.log(GREEN + `Successfully added batch ${index + 1}/${batches.length} (${batch.length} jobs)` + RESET);
-        } catch (error) {
-          console.error(RED + `Error adding batch ${index + 1}:`, error, RESET);
-        }
-        resolve(true);
-      }, index * DELAY_MS); // Stagger batch processing
-    });
-  });
+        })
+      );
 
-  // Wait for all batches to complete
-  await Promise.all(batchPromises);
+      console.log(GREEN + `Processed chunk ${chunkIndex + 1}/${chunks.length} (${currentChunk.length} jobs)` + RESET);
 
-  // If there are remaining jobs, schedule them for later processing
-  if (remainingJobs.length > 0) {
-    console.log(`Adding ${remainingJobs.length} remaining jobs for processing...`);
-    setTimeout(() => processBulkJobs(remainingJobs, createKey), DELAY_MS);
+      // Small delay between chunks
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+    } catch (error) {
+      console.error(RED + `Error processing chunk ${chunkIndex + 1}:`, error, RESET);
+    }
+  }
+}
+
+// Rate limiter class
+class RateLimiter {
+  private tokens: number;
+  private lastRefill: number;
+  private readonly rate: number;
+
+  constructor(rate: number) {
+    this.tokens = rate;
+    this.lastRefill = Date.now();
+    this.rate = rate;
+  }
+
+  async acquire(): Promise<void> {
+    while (this.tokens <= 0) {
+      const now = Date.now();
+      const timePassed = now - this.lastRefill;
+      const refillAmount = Math.floor(timePassed * (this.rate / 1000));
+
+      if (refillAmount > 0) {
+        this.tokens = Math.min(this.rate, this.tokens + refillAmount);
+        this.lastRefill = now;
+      }
+
+      if (this.tokens <= 0) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    this.tokens--;
+  }
+}
+
+// Helper function to wait for queue drain
+async function waitForQueueDrain(): Promise<void> {
+  while (true) {
+    const counts = await queue.getJobCounts();
+    if ((counts.prioritized || 0) <= DRAIN_THRESHOLD) {
+      return;
+    }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+}
+
+// Helper function to chunk array
+function chunk<T>(array: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+    array.slice(i * size, i * size + size)
+  );
+}
+
+async function waitForQueueHealth(): Promise<void> {
+  while (true) {
+    const counts = await queue.getJobCounts();
+    const totalInProgress = (counts.active || 0) + (counts.waiting || 0);
+
+    if (totalInProgress <= QUEUE_LOW_WATERMARK) {
+      console.log(GREEN + `Queue health restored (${totalInProgress} jobs in progress)` + RESET);
+      return;
+    }
+
+    console.log(YELLOW + `Waiting for queue to drain... (${totalInProgress} jobs in progress)` + RESET);
+    await new Promise(resolve => setTimeout(resolve, 5000));
   }
 }
 
