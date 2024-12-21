@@ -1,7 +1,7 @@
 import { BigNumber, ethers, utils, Wallet } from "ethers";
 import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
 import redisClient from "../../utils/redis";
-import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, queue, RESET, trackBidRate } from "../..";
+import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, queue, redis, RESET, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job, Queue } from "bullmq";
@@ -14,7 +14,6 @@ config()
 const API_KEY = process.env.API_KEY as string;
 
 const BLUR_API_URL = 'https://api.nfttools.website/blur';
-const redis = redisClient.getClient();
 
 const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
 
@@ -27,7 +26,7 @@ const balanceChecker = createBalanceChecker(deps);
 
 const provider = new ethers.providers.AlchemyProvider('mainnet', ALCHEMY_API_KEY);
 
-const lockManager = new DistributedLockManager(redis, {
+const lockManager = new DistributedLockManager({
   lockPrefix: 'blur:lock:',
   defaultTTLSeconds: 60 // 1 minute lock timeout
 });
@@ -53,38 +52,6 @@ export async function bidOnBlur(
 ) {
   const bethBalance = await balanceChecker.getBethBalance(wallet_address);
   let offerPriceEth: string | number = (Number(offer_price) / 1e18)
-
-  const pattern = `*:blur:${slug}:*`
-  const keys = await redis.keys(pattern)
-  let totalExistingOffers = 0
-  if (keys.length > 0) {
-    const values = await redis.mget(keys)
-    totalExistingOffers = values.reduce((sum, value) =>
-      sum + (value ? Number(value) : 0), 0)
-  }
-  const bidLimit = 200
-
-  const totalOffersWithNew = totalExistingOffers / 1e18 + Number(offerPriceEth)
-  if (totalOffersWithNew > bethBalance * bidLimit) {
-    console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
-    console.log(RED + `Total offers (${totalOffersWithNew} BETH) would exceed 200x available BETH balance (${bethBalance * 200} BETH). SKIPPING ...`.toUpperCase() + RESET);
-    console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
-
-    const jobs: Job[] = await queue.getJobs(['prioritized']);
-    const blurJobs = jobs.filter(job => {
-      if (!job || !job.name) return false
-      return [BLUR_SCHEDULE, BLUR_TRAIT_BID].includes(job?.name)
-    }
-    );
-
-    if (blurJobs.length > 0) {
-      await queue.pause()
-      await Promise.all(blurJobs.map(job => job.remove()));
-      console.log(RED + `REMOVING ${blurJobs.length} BLUR JOB(S) DUE TO INSUFFICIENT BETH BALANCE)` + RESET);
-      await queue.resume()
-    }
-    return
-  }
 
   if (offerPriceEth > bethBalance) {
     console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);

@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc",
-		"start": "node --expose-gc --max-old-space-size=4096 dist/index.js",
+		"start": "tsc && node --expose-gc --max-old-space-size=8192 dist/src/index.js",
 		"dev": "nodemon",
 		"ci": "npm install --frozen-lockfile",
 		"dc:up": "docker compose up -d",

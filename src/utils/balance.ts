@@ -1,11 +1,13 @@
 import { ethers } from "ethers";
-import { Redis } from 'ioredis';
+import { Redis, Cluster } from 'ioredis';
 import { axiosInstance, limiter } from "../init";
 import { DistributedLockManager } from './lock';
+import RedisClient from './redis';
 
 // Constants
 const CACHE_EXPIRY_SECONDS = 60;
 const BLUR_POOL_ADDRESS = "0x0000000000A39bb272e79075ade125fd351887Ac";
+const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
 // Environment configuration
 const config = {
@@ -18,17 +20,18 @@ const config = {
 type BalanceType = 'weth' | 'beth';
 
 interface Dependencies {
-  redis: Redis;
   provider: ethers.providers.Provider;
 }
 
 class BalanceChecker {
   private deps: Dependencies;
   private lockManager: DistributedLockManager;
+  private redis: Cluster;
 
   constructor(deps: Dependencies) {
     this.deps = deps;
-    this.lockManager = new DistributedLockManager(deps.redis, {
+    this.redis = RedisClient.getClient();
+    this.lockManager = new DistributedLockManager({
       lockPrefix: 'balance_lock:',
       defaultTTLSeconds: CACHE_EXPIRY_SECONDS
     });
@@ -36,24 +39,24 @@ class BalanceChecker {
 
   private async getCachedBalance(cacheKey: string): Promise<number | null> {
     try {
-      const cachedBalance = await this.deps.redis.get(cacheKey);
+      const cachedBalance = await this.redis.get(cacheKey);
       return cachedBalance ? Number(cachedBalance) : null;
     } catch (error) {
-      console.error('Redis cache error:', error);
+      console.error('Redis Cluster cache error:', error);
       return null;
     }
   }
 
   private async setCachedBalance(cacheKey: string, balance: number): Promise<void> {
     try {
-      await this.deps.redis.set(
+      await this.redis.set(
         cacheKey,
         balance.toString(),
         'EX',
         CACHE_EXPIRY_SECONDS
       );
     } catch (error) {
-      console.error('Redis cache set error:', error);
+      console.error('Redis Cluster cache set error:', error);
     }
   }
 
@@ -70,49 +73,27 @@ class BalanceChecker {
           return cachedBalanceAfterLock;
         }
 
-        const payload = {
-          id: "WalletPopoverDataPollerClosedQuery",
-          query: "query WalletPopoverDataPollerClosedQuery(\n  $address: AddressScalar!\n  $wrappedCurrencySymbol: String!\n  $wrappedCurrencyChain: ChainScalar!\n) {\n  ...WalletAndAccountButtonFundsDisplay_data_p0g3U\n}\n\nfragment FundsDisplay_walletFunds on WalletFundsType {\n  symbol\n  quantity\n}\n\nfragment WalletAndAccountButtonFundsDisplay_data_p0g3U on Query {\n  wallet(address: $address) {\n    wrappedCurrencyFunds: fundsOf(symbol: $wrappedCurrencySymbol, chain: $wrappedCurrencyChain) {\n      quantity\n      symbol\n      ...FundsDisplay_walletFunds\n      id\n    }\n  }\n}\n",
-          variables: {
-            address,
-            wrappedCurrencySymbol: "WETH",
-            wrappedCurrencyChain: "ETHEREUM"
-          }
-        };
+        const wethContract = new ethers.Contract(
+          WETH_ADDRESS,
+          ['function balanceOf(address) view returns (uint256)'],
+          this.deps.provider
+        );
 
         // Retry logic with exponential backoff
         const maxRetries = 3;
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
           try {
-            const response = await limiter.schedule(() =>
-              axiosInstance.post(
-                config.OPENSEA_API_URL,
-                payload,
-                {
-                  headers: {
-                    'x-nft-api-key': config.API_KEY,
-                    'x-auth-address': address,
-                    'x-signed-query': "51ab975e49c64eae0c01857a6fa0f29a3844856bfd4bbe3375321f6bcc4fdfac",
-                  },
-                }
-              )
-            );
+            const balance = await wethContract.balanceOf(address);
+            const formattedBalance = Number(ethers.utils.formatEther(balance));
 
-            let responseData = response.data;
-            if (!responseData || typeof responseData !== 'object') {
-              console.warn('Invalid response data format:', responseData);
-              return cachedBalance ?? 0;
-            }
-
-            const balance = this.extractBalanceFromResponse(responseData, cachedBalance);
-            await this.setCachedBalance(cacheKey, balance);
-            return balance;
+            await this.setCachedBalance(cacheKey, formattedBalance);
+            return formattedBalance;
           } catch (error) {
             if (attempt === maxRetries) {
-              console.error("Error in WETH balance fetch after retries:", error);
+              console.error("Error fetching WETH balance after retries:", error);
               return cachedBalance ?? 0;
             }
-            const backoffTime = Math.pow(2, attempt) * 1000; // Exponential backoff
+            const backoffTime = Math.pow(2, attempt) * 1000;
             await new Promise(resolve => setTimeout(resolve, backoffTime));
           }
         }

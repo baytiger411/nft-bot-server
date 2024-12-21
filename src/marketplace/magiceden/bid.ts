@@ -1,7 +1,7 @@
 import { ethers, Wallet } from "ethers";
 import { axiosInstance, limiter } from "../../init";
 import { config } from "dotenv";
-import { currentTasks, MAGENTA, trackBidRate } from "../..";
+import { currentTasks, MAGENTA, redis, trackBidRate } from "../..";
 import redisClient from "../../utils/redis";
 import { createBalanceChecker } from "../../utils/balance";
 import { DistributedLockManager } from '../../utils/lock';
@@ -17,7 +17,6 @@ const API_KEY = process.env.API_KEY
 const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
 const provider = new ethers.providers.AlchemyProvider('mainnet', ALCHEMY_API_KEY);
 
-const redis = redisClient.getClient();
 
 const deps = {
   redis: redis,
@@ -26,7 +25,7 @@ const deps = {
 
 const balanceChecker = createBalanceChecker(deps);
 
-const lockManager = new DistributedLockManager(redis, {
+const lockManager = new DistributedLockManager({
   lockPrefix: 'magiceden:fetch:',
   defaultTTLSeconds: 30
 });

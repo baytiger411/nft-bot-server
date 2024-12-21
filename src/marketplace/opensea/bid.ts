@@ -1,7 +1,7 @@
 import { BigNumber, Contract, ethers, Wallet } from "ethers";
 import { SEAPORT_CONTRACT_ADDRESS, SEAPORT_MIN_ABI, WETH_MIN_ABI } from "../../constants";
 import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
-import { BLUE, currentTasks, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, trackBidRate } from "../..";
+import { BLUE, currentTasks, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
 import redisClient from "../../utils/redis";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
@@ -27,7 +27,6 @@ const RED = '\x1b[31m';
 const RESET = '\x1b[0m';
 const YELLOW = '\x1b[33m'; // Add this constant for yellow color
 
-const redis = redisClient.getClient();
 
 const domain = {
   name: 'Seaport',
@@ -203,7 +202,7 @@ export async function bidOnOpensea(
   wallet_address: string,
   private_key: string,
   slug: string,
-  offer_price: bigint,
+  offer_price: number,
   creator_fees: IFee,
   enforceCreatorFee: boolean,
   expiry: number = 900,
@@ -221,16 +220,8 @@ export async function bidOnOpensea(
   const wethBalance = await balanceChecker.getWethBalance(wallet_address);
   const pattern = `*:opensea:${slug}:*`
   const keys = await redis.keys(pattern)
-  let totalExistingOffers = 0
-  const bidLimit = 1000
 
-  if (keys.length > 0) {
-    const values = await redis.mget(keys)
-    totalExistingOffers = values.reduce((sum, value) =>
-      sum + (value ? Number(value) : 0), 0)
-  }
 
-  const totalOffersWithNew = totalExistingOffers / 1e18 + Number(offerPriceEth)
   // if (totalOffersWithNew > wethBalance * bidLimit) {
   //   console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
   //   console.log(RED + `Total offers (${totalOffersWithNew} WETH) would exceed 1000x available WETH balance (${wethBalance * 1000} WETH). SKIPPING ...`.toUpperCase() + RESET);

@@ -1,15 +1,16 @@
-import { Redis } from 'ioredis';
+import { Cluster } from 'ioredis';
+import RedisClient from './redis';
 
 export class DistributedLockManager {
-  private redis: Redis;
+  private redis: Cluster;
   private readonly lockPrefix: string;
   private readonly defaultTTLSeconds: number;
 
-  constructor(redis: Redis, options?: {
+  constructor(options?: {
     lockPrefix?: string;
     defaultTTLSeconds?: number;
   }) {
-    this.redis = redis;
+    this.redis = RedisClient.getClient();
     this.lockPrefix = options?.lockPrefix ?? 'lock:';
     this.defaultTTLSeconds = options?.defaultTTLSeconds ?? 30;
   }
@@ -18,10 +19,20 @@ export class DistributedLockManager {
     return `${this.lockPrefix}${key}`;
   }
 
+  private async ensureConnection(): Promise<void> {
+    if (!RedisClient.isReady()) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!RedisClient.isReady()) {
+        throw new Error('Redis connection not ready');
+      }
+    }
+  }
+
   async acquireLock(
     key: string,
     ttlSeconds: number = this.defaultTTLSeconds
   ): Promise<boolean> {
+    await this.ensureConnection();
     const lockKey = this.getLockKey(key);
 
     const acquired = await this.redis.setex(
@@ -34,6 +45,7 @@ export class DistributedLockManager {
   }
 
   async releaseLock(key: string): Promise<void> {
+    await this.ensureConnection();
     const lockKey = this.getLockKey(key);
     await this.redis.del(lockKey);
   }

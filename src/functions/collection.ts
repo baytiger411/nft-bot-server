@@ -1,17 +1,19 @@
 import { config } from "dotenv";
 import { axiosInstance, limiter } from "../init"; // Import Redis client
-import redisClient from "../utils/redis";
 import { DistributedLockManager } from "../utils/lock";
+import { redis } from "..";
 
 config()
 
 const API_KEY = process.env.API_KEY as string
 
-const redis = redisClient.getClient()
-
 const collectionCache: { [key: string]: any } = {};
 const MAX_CACHE_ITEMS = 1000;
-const lockManager = new DistributedLockManager(redis);
+
+const lockManager = new DistributedLockManager({
+  lockPrefix: 'collection:fetch:',
+  defaultTTLSeconds: 30
+});
 
 export async function getCollectionDetails(slug: string) {
   // First check memory cache
