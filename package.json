@@ -9,6 +9,7 @@
 		"dev": "nodemon",
 		"ci": "npm install --frozen-lockfile",
 		"dc:up": "docker compose up -d",
+		"dc:down": "docker compose down -v",
 		"dc:destroy": "docker compose down --volumes --remove-orphans --timeout 15",
 		"test": "nodemon test.ts",
 		"bench": "nodemon bench.js"

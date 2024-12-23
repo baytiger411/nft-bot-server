@@ -1,7 +1,7 @@
 import { ethers, Wallet } from "ethers";
 import { axiosInstance, limiter } from "../../init";
 import { config } from "dotenv";
-import { currentTasks, MAGENTA, redis, trackBidRate } from "../..";
+import { currentTasks, decrementBidCount, MAGENTA, redis, trackBidRate } from "../..";
 import redisClient from "../../utils/redis";
 import { createBalanceChecker } from "../../utils/balance";
 import { DistributedLockManager } from '../../utils/lock';
@@ -248,7 +248,7 @@ async function signOrderData(wallet: ethers.Wallet, signData: any, trait?: Trait
 * @param trait - Collection trait
  * @returns The response from the API.
  */
-async function sendSignedOrderData(order: any, taskId: string, offerPrice: string | number, privateKey: string, bidCount: string, signature: string, data: any, slug: string, expiry: number = 900, trait?: Trait, tokenId?: number | string) {
+async function sendSignedOrderData(order: any, taskId: string, offerPrice: string | number, privateKey: string, bidCount: string, signature: string, data: any, slug: string, expiry = 900, trait?: Trait, tokenId?: number | string) {
   try {
     const task = await currentTasks.find((task) =>
       task.contract.slug.toLowerCase() === slug.toLowerCase() &&
@@ -290,7 +290,7 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
       const task = currentTasks.find((task) => task.contract.slug.toLowerCase() === slug.toLowerCase() && task.selectedMarketplaces.includes("MagicEden"))
 
       if (!task) {
-        return await cancelMagicEdenBid([order], privateKey)
+        return await cancelMagicEdenBid([order], privateKey, taskId)
       }
       const key = `${bidCount}:${baseKey}`;
       const bidExpiry = await getExpiry(task.bidDuration)
@@ -304,7 +304,7 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
       await redis.setex(key, expiry, order);
       await redis.setex(offerKey, expiry, offerPrice.toString());
 
-      trackBidRate("magiceden")
+      trackBidRate("magiceden", taskId)
       const countKey = `magiceden:${taskId}:count`;
 
       await redis.incr(countKey);
@@ -312,7 +312,7 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
 
       console.log(MAGENTA, successMessage, RESET);
       if (!task) {
-        await cancelMagicEdenBid([order], privateKey)
+        await cancelMagicEdenBid([order], privateKey, taskId)
       }
       return offerResponse;
     } catch (error: any) {
@@ -448,7 +448,7 @@ export async function submitSignedOrderData(taskId: string, offerPrice: string |
 
 }
 
-export async function cancelMagicEdenBid(orderIds: string[], privateKey: string) {
+export async function cancelMagicEdenBid(orderIds: string[], privateKey: string, taskId: string) {
   try {
     const processedOrderIds = orderIds.map(orderId => {
       try {
@@ -505,6 +505,13 @@ export async function cancelMagicEdenBid(orderIds: string[], privateKey: string)
     ))
 
     console.log(JSON.stringify(cancelResponse));
+
+    // Decrement bid count for each cancelled order
+    orderIds.forEach(() => {
+      decrementBidCount('magiceden', taskId);
+    });
+
+    console.log('Successfully cancelled MagicEden bids');
   } catch (error: any) {
   }
 }
@@ -532,7 +539,6 @@ async function signCancelOrder(cancelItem: any | undefined, privateKey: string) 
 
 export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN", walletAddress: string, contractAddress: string, identifier?: string | Record<string, string>) {
   try {
-
     const URL = `https://api.nfttools.website/magiceden/v3/rtp/ethereum/orders/bids/v6`;
     if (type === "COLLECTION") {
       const queryParams = {
@@ -556,7 +562,7 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
       );
 
       const offer = data?.orders[0]
-      if (!offer) return null
+      if (!offer) return { amount: "0", owner: "" }
       return { amount: offer.price.amount.raw, owner: offer.maker }
 
     } else if (type === "TOKEN") {
@@ -579,52 +585,43 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
       );
 
       const offer = data?.orders
-
-      if (!offer?.length) return null
-      return { amount: offer[0].price.amount.raw || 0, owner: offer[0].maker }
+      if (!offer?.length) return { amount: "0", owner: "" }
+      return { amount: offer[0].price.amount.raw || "0", owner: offer[0].maker }
 
     } else if (type === "TRAIT") {
+      interface TraitQueryParams {
+        collection: string;
+        [key: string]: string | string[];
+      }
 
-      const queryParams: QueryParams = {
-        includeQuantity: true,
-        includeLastSale: true,
-        excludeSpam: true,
-        excludeBurnt: true,
+      const queryParams: TraitQueryParams = {
         collection: contractAddress,
-        sortBy: 'floorAskPrice',
-        sortDirection: 'asc',
-        limit: 50,
-        includeAttributes: false,
-        excludeSources: ['nftx.io', 'sudoswap.xyz']
+        sortBy: 'price',
+        status: 'active',
+        excludeEOA: 'false',
       };
 
-      if (identifier && typeof identifier === 'object') {
-        queryParams[`attributes[${identifier.attributeKey}][]`] = identifier.attributeValue;
+      if (identifier && typeof identifier === "object" && identifier.attributeKey && identifier.attributeValue) {
+        queryParams[`attributes[${identifier.attributeKey}]`] = identifier.attributeValue;
       }
 
-      const { data } = await limiter.schedule(() =>
-        axiosInstance.get<MagicedenTraitTokenResponse>(
-          'https://api.nfttools.website/magiceden/v3/rtp/ethereum/tokens/v7',
-          {
-            params: queryParams,
-            headers: {
-              'content-type': 'application/json',
-              'X-NFT-API-Key': API_KEY
-            }
+      const { data } = await limiter.schedule(() => axiosInstance.get<MagicEdenTraitOfferResponse>(
+        URL,
+        {
+          params: queryParams,
+          headers: {
+            'X-NFT-API-Key': API_KEY,
           }
-        )
-      );
-
-      const offer = data?.tokens?.[0]
-      if (!offer) return null;
-
-      return {
-        amount: +(offer.token?.collection?.floorAskPrice?.amount?.raw || 0),
-        owner: offer.market?.floorAsk?.maker || ''
-      }
+        }
+      ));
+      const orders = data.orders[0]
+      if (!orders) return { amount: "0", owner: "" }
+      return { amount: orders.price.amount.raw, owner: orders.maker }
     }
+    return { amount: "0", owner: "" }
   } catch (error: any) {
     console.log(error);
+    return { amount: "0", owner: "" }
   }
 }
 
@@ -1273,4 +1270,78 @@ export interface MagicedenTraitTokenResponse {
     };
   }[];
   continuation: string;
+}
+
+
+
+// ME_KEY="a86c5cf0-205b-4a6c-a317-0bac8dcea553"
+
+
+interface MagicEdenTraitOfferResponse {
+  orders: MagicEdenTraitOfferOrder[];
+  continuation: string;
+}
+
+interface MagicEdenTraitOfferOrder {
+  id: string;
+  kind: string;
+  side: string;
+  status: string;
+  tokenSetId: string;
+  tokenSetSchemaHash: string;
+  contract: string;
+  contractKind: string;
+  maker: string;
+  taker: string;
+  price: {
+    currency: {
+      contract: string;
+      name: string;
+      symbol: string;
+      decimals: number;
+    };
+    amount: {
+      raw: string;
+      decimal: number;
+      usd: number;
+      native: number;
+    };
+    netAmount: {
+      raw: string;
+      decimal: number;
+      usd: number;
+      native: number;
+    };
+  };
+  validFrom: number;
+  validUntil: number;
+  quantityFilled: number;
+  quantityRemaining: number;
+  criteria: {
+    kind: string;
+    data: {
+      collection: {
+        id: string;
+      };
+    };
+  };
+  source: {
+    id: string;
+    domain: string;
+    name: string;
+    icon: string;
+    url: string;
+  };
+  feeBps: number;
+  feeBreakdown: {
+    kind: string;
+    recipient: string;
+    bps: number;
+  }[];
+  expiration: number;
+  isReservoir: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+  originatedAt: string | null;
+  isNativeOffChainCancellable: boolean;
 }

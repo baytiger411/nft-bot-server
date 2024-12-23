@@ -79,7 +79,7 @@ class RedisClient {
 
         this.client = new Redis.Cluster(getRedisNodes(), {
           ...defaultConfig,
-          scaleReads: 'all',
+          scaleReads: "all",
           redisOptions: {
             ...defaultConfig.redisOptions,
             lazyConnect: true,

@@ -1,8 +1,7 @@
 import { BigNumber, Contract, ethers, Wallet } from "ethers";
 import { SEAPORT_CONTRACT_ADDRESS, SEAPORT_MIN_ABI, WETH_MIN_ABI } from "../../constants";
 import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
-import { BLUE, currentTasks, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
-import redisClient from "../../utils/redis";
+import { BLUE, currentTasks, decrementBidCount, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job } from "bullmq";
@@ -307,7 +306,7 @@ export async function bidOnOpensea(
     await redis.incr(countKey);
 
     await redis.setex(key, 900, itemOrderHash);
-    trackBidRate('opensea');
+    trackBidRate('opensea', taskId);
 
     const successMessage = `🎉 TOKEN OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${slug.toUpperCase()}  TOKEN: ${asset.tokenId} 🎉`
     console.log(BLUE, JSON.stringify(successMessage), RESET);
@@ -469,14 +468,14 @@ async function submitOfferToOpensea(taskId: string, privateKey: string, slug: st
     const countKey = `opensea:${taskId}:count`;
     await redis.incr(countKey);
 
-    await redis.setex(key, 900, order_hash);
+    await redis.setex(key, expiry, order_hash);
+    trackBidRate('opensea', taskId);
 
     const successMessage = opensea_traits ?
       `🎉 TRAIT OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${payload.criteria.collection.slug.toUpperCase()}  TRAIT: ${opensea_traits} 🎉`
       : `🎉 COLLECTION OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${payload.criteria.collection.slug.toUpperCase()} 🎉`
     console.log(BLUE, successMessage, RESET);
 
-    trackBidRate('opensea');
 
   } catch (error: any) {
     if (error?.response?.data?.message?.errors?.[0] === 'Outstanding order to wallet balance ratio exceeds allowed limit.' ||
@@ -524,7 +523,7 @@ async function buildOffer(buildPayload: any) {
   }
 }
 
-export async function cancelOrder(orderHash: string, protocolAddress: string, privateKey: string) {
+export async function cancelOrder(orderHash: string, protocolAddress: string, privateKey: string, taskId: string) {
   if (!orderHash || !protocolAddress || !privateKey) return
   const offererSignature = await signCancelOrder(orderHash, protocolAddress, privateKey);
 
@@ -546,6 +545,8 @@ export async function cancelOrder(orderHash: string, protocolAddress: string, pr
   try {
     const response = await limiter.schedule(() => axiosInstance.post(url, body, { headers }))
     console.log(JSON.stringify({ cancelled: true }));
+
+    decrementBidCount('opensea', taskId)
     return response.data;
   } catch (error: any) {
     return null;
@@ -681,6 +682,10 @@ export async function fetchOpenseaOffers(
         }
       }));
 
+      if (!data.offers?.length) {
+        return { amount: 0, owner: "" };
+      }
+
       const filteredOffers = data.offers
         .sort((a: any, b: any) => +b.price.value - +a.price.value);
 
@@ -702,6 +707,10 @@ export async function fetchOpenseaOffers(
         params: { type, value }
       }));
 
+      if (!data.offers?.length) {
+        return { amount: 0, owner: "" };
+      }
+
       const bestOffer = data.offers?.sort((a: any, b: any) => +b.price.value - +a.price.value)[0]
 
       return { amount: bestOffer?.price?.value, owner: bestOffer?.protocol_data?.parameters?.offerer };
@@ -715,6 +724,11 @@ export async function fetchOpenseaOffers(
           'X-NFT-API-Key': API_KEY
         }
       }))
+
+      if (!data) {
+        return { amount: 0, owner: "" };
+      }
+
       const quantity = data?.protocol_data?.parameters?.consideration?.find((item: any) => item?.token.toLowerCase() === contractAddress.toLowerCase()).startAmount ?? 1
 
       return { amount: Number(data?.price?.value) / Number(quantity), owner: data?.protocol_data?.parameters?.offerer };
@@ -726,6 +740,7 @@ export async function fetchOpenseaOffers(
       error?.response?.data?.message?.errors && error.response.data.message.errors.length > 0
         ? error.response.data.message.errors[0]
         : JSON.stringify(error?.response?.data?.message) + RESET);
+    return { amount: 0, owner: "" };
   }
 }
 

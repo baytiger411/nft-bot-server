@@ -1,7 +1,7 @@
 import { BigNumber, ethers, utils, Wallet } from "ethers";
 import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
 import redisClient from "../../utils/redis";
-import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, queue, redis, RESET, trackBidRate } from "../..";
+import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, decrementBidCount, queue, redis, RESET, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job, Queue } from "bullmq";
@@ -288,7 +288,7 @@ async function submitBidToBlur(
       const key = `${bidCount}:${baseKey}`;
 
       await redis.setex(key, expiry, JSON.stringify(cancelPayload));
-      trackBidRate("blur")
+      trackBidRate("blur", taskId)
       const countKey = `blur:${taskId}:count`;
       await redis.incr(countKey);
     }
@@ -314,7 +314,7 @@ async function submitBidToBlur(
 export async function cancelBlurBid(data: BlurCancelPayload) {
   try {
     if (!data || !data.payload || !data.privateKey) return
-    const { payload, privateKey } = data
+    const { payload, privateKey, taskId } = data
     const wallet = new Wallet(privateKey, provider);
     const walletAddress = wallet.address
     const accessToken = await getAccessToken(BLUR_API_URL, privateKey);
@@ -328,6 +328,11 @@ export async function cancelBlurBid(data: BlurCancelPayload) {
       }
     }))
     console.log(JSON.stringify(cancelResponse));
+
+    // Decrement bid count after successful cancellation
+    decrementBidCount('blur', taskId);
+
+    console.log('Successfully cancelled Blur bid');
   } catch (error: any) {
     if (error.response?.data?.message?.message !== 'No bids found') {
       console.log("cancelBlurBid: ", error?.response?.data || error);
@@ -406,6 +411,7 @@ interface BlurCancelPayload {
     }>;
   };
   privateKey: string;
+  taskId: string;
 }
 
 
