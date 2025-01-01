@@ -790,9 +790,9 @@ function createJobKey(job: Job) {
 async function processBulkJobs(jobs: any[], createKey = false) {
   if (!jobs?.length) return;
 
-  const rateLimiter = new RateLimiter(RATE_LIMIT);
+  const rateLimiter = new RateLimiter(MAX_PRIORITIZED_JOBS);
 
-  const chunks = chunk(jobs, RATE_LIMIT);
+  const chunks = chunk(jobs, MAX_PRIORITIZED_JOBS);
 
   for (const [chunkIndex, currentChunk] of chunks.entries()) {
     try {

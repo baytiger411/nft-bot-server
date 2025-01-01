@@ -140,7 +140,7 @@ export async function bidOnBlur(
     await submitBidToBlur(taskId, bidCount, offer_price, BLUR_API_URL, accessToken, wallet_address, submitPayload, slug, cancelPayload, expiry, traits);
 
   } catch (error: any) {
-    console.log("blur post offer error: ", error.response.data || error.message);
+    console.log("blur post offer error: ", error?.response?.data || error?.message);
     if (!errorStats[taskId]) {
       errorStats[taskId] = {
         magiceden: 0,
