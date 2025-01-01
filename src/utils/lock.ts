@@ -11,12 +11,12 @@ export class DistributedLockManager {
     defaultTTLSeconds?: number;
   }) {
     this.redis = RedisClient.getClient();
-    this.lockPrefix = options?.lockPrefix ?? 'lock:';
+    this.lockPrefix = options?.lockPrefix ?? '{lock}:';
     this.defaultTTLSeconds = options?.defaultTTLSeconds ?? 30;
   }
 
   private getLockKey(key: string): string {
-    return `${this.lockPrefix}${key}`;
+    return `{${this.lockPrefix}${key}}`;
   }
 
   private async ensureConnection(): Promise<void> {

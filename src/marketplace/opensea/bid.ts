@@ -1,7 +1,7 @@
 import { BigNumber, Contract, ethers, Wallet } from "ethers";
 import { SEAPORT_CONTRACT_ADDRESS, SEAPORT_MIN_ABI, WETH_MIN_ABI } from "../../constants";
-import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
-import { BLUE, currentTasks, decrementBidCount, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
+import { axiosInstance, limiter } from "../../init";
+import { BLUE, currentTasks, decrementBidCount, errorStats, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job } from "bullmq";
@@ -10,7 +10,6 @@ import { Job } from "bullmq";
 
 config()
 
-const OPENSEA_PROTOCOL_ADDRESS = "0x0000000000000068F116a894984e2DB1123eB395"
 const API_KEY = process.env.API_KEY as string;
 const OPENSEA_ITEM_ZONE = "0x000056f7000000ece9003ca63978907a00ffd100"
 const OPENSEA_COLLECTION_ZONE = "0x004C00500000aD104D7DBd00e3ae0A5C00560C00"
@@ -19,12 +18,11 @@ const CONDUIT_KEY = "0x0000007b02230091a7ed01230072f7006a004d60a8d4e71d599b81042
 const SEAPORT_1_6 = "0x0000000000000068f116a894984e2db1123eb395"
 const WETH_CONTRACT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 const OPENSEA_FEE_ADDRESS = "0x0000a26b00c1F0DF003000390027140000fAa719"
-const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY as string;
 const provider = new ethers.providers.AlchemyProvider('mainnet', ALCHEMY_API_KEY);
 const SEAPORT_CONTRACT = new ethers.Contract(SEAPORT_CONTRACT_ADDRESS, SEAPORT_MIN_ABI, provider);
 const RED = '\x1b[31m';
 const RESET = '\x1b[0m';
-const YELLOW = '\x1b[33m'; // Add this constant for yellow color
 
 
 const domain = {
@@ -181,7 +179,7 @@ async function buildItemOffer(offerSpecification: ItemOfferSpecification) {
 
     return offer
   } catch (error) {
-    console.log(error);
+    throw error
   }
 }
 /**
@@ -214,32 +212,8 @@ export async function bidOnOpensea(
   const divider = BigNumber.from(10000);
   const roundedNumber = Math.round(Number(offer_price) / 1e14) * 1e14;
   const offerPrice = BigNumber.from(roundedNumber.toString());
-
   const offerPriceEth = Number(offer_price) / 1e18
   const wethBalance = await balanceChecker.getWethBalance(wallet_address);
-  const pattern = `*:opensea:${slug}:*`
-  const keys = await redis.keys(pattern)
-
-
-  // if (totalOffersWithNew > wethBalance * bidLimit) {
-  //   console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
-  //   console.log(RED + `Total offers (${totalOffersWithNew} WETH) would exceed 1000x available WETH balance (${wethBalance * 1000} WETH). SKIPPING ...`.toUpperCase() + RESET);
-  //   console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
-
-  //   const jobs = await queue.getJobs(['prioritized']);
-  //   const openseaJobs: Job[] = jobs.filter(job =>
-  //     [OPENSEA_SCHEDULE, OPENSEA_TRAIT_BID, OPENSEA_TOKEN_BID].includes(job?.name)
-  //   );
-
-  //   if (openseaJobs.length > 0) {
-  //     await queue.pause()
-  //     await Promise.allSettled(openseaJobs.map(job => job.remove()));
-  //     console.log(RED + `REMOVING ${openseaJobs.length} OPENSEA JOB(S) DUE TO OUTSTANDING ORDER TO WALLET BALANCE RATIO EXCEEDING ALLOWED LIMIT.` + RESET);
-  //     await queue.resume()
-  //   }
-
-  //   return
-  // }
 
   if (offerPriceEth > wethBalance) {
     console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
@@ -298,14 +272,22 @@ export async function bidOnOpensea(
 
     const itemResponse = await postItemOffer(offer, itemSignature, slug)
     const itemOrderHash = itemResponse?.order?.order_hash
-    const baseKey = `opensea:order:${slug}:${asset.tokenId}`;
+    const [taskId, count] = bidCount.split(":")
 
-    const key = `${bidCount}:${baseKey}`;
+    const orderTrackingKey = `{${taskId}}:opensea:orders`;
+    const orderKey = `{${taskId}}:${count}:opensea:order:${slug}:${asset.tokenId}`;
 
-    const countKey = `opensea:${taskId}:count`;
-    await redis.incr(countKey);
+    const order = JSON.stringify({
+      offer: offerPrice.toString(),
+      orderId: itemOrderHash
+    })
 
-    await redis.setex(key, 900, itemOrderHash);
+    await Promise.all([
+      redis.sadd(orderTrackingKey, orderKey),
+      redis.setex(orderKey, expiry, order),
+      redis.expire(orderTrackingKey, expiry)
+    ]);
+
     trackBidRate('opensea', taskId);
 
     const successMessage = `🎉 TOKEN OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${slug.toUpperCase()}  TOKEN: ${asset.tokenId} 🎉`
@@ -427,9 +409,17 @@ export async function bidOnOpensea(
       const task = currentTasks.find((task) => task.contract.slug.toLowerCase() === slug.toLowerCase() && task.selectedMarketplaces.includes("OpenSea"))
       if (!task) return
 
-      await submitOfferToOpensea(taskId, private_key, slug, bidCount, payload, 900, opensea_traits)
+      await submitOfferToOpensea(slug, bidCount, offerPrice.toString(), payload, expiry, opensea_traits)
     } catch (error: any) {
-      console.log("opensea error", error);
+      console.log("opensea post offer error: ", error?.response?.data || error?.message || error);
+      if (!errorStats[taskId]) {
+        errorStats[taskId] = {
+          magiceden: 0,
+          opensea: 0,
+          blur: 0
+        }
+      }
+      errorStats[taskId]['opensea']++
     }
   }
 };
@@ -439,10 +429,13 @@ export async function bidOnOpensea(
  * Posts an offer to OpenSea.
  * @param payload - The payload of the offer.
  */
-async function submitOfferToOpensea(taskId: string, privateKey: string, slug: string, bidCount: string, payload: IPayload, expiry = 900, opensea_traits?: string) {
+async function submitOfferToOpensea(slug: string, bidCount: string, offerPrice: string, payload: IPayload, expiry = 900, opensea_traits?: string) {
   let task = currentTasks.find((task) => task.contract.slug.toLowerCase() === slug.toLowerCase() || task.selectedMarketplaces.includes("OpenSea"))
   if (!task) return
   try {
+
+    const [taskId, count] = bidCount.split(":")
+
     const { data: offer } = await
       limiter.schedule(() => axiosInstance.request<OpenseaOffer>({
         method: 'POST',
@@ -455,22 +448,28 @@ async function submitOfferToOpensea(taskId: string, privateKey: string, slug: st
       }))
 
     const order_hash = offer.order_hash
-    const trait = offer?.criteria?.trait?.type
+    const identifier = offer?.criteria?.trait?.type
       && offer?.criteria?.trait?.value
-      ? `trait:${offer.criteria.trait?.type}:${offer.criteria.trait?.value}`
-      : "default"
-
+      ? `${offer.criteria.trait?.type}:${offer.criteria.trait?.value}`
+      : "collection"
 
     const slug = offer?.criteria?.collection?.slug
-    const baseKey = `opensea:order:${slug}:${trait}`;
-    const key = `${bidCount}:${baseKey}`;
 
-    const countKey = `opensea:${taskId}:count`;
-    await redis.incr(countKey);
+    const orderTrackingKey = `{${taskId}}:opensea:orders`;
+    const orderKey = `{${taskId}}:${count}:opensea:order:${slug}:${identifier}`;
 
-    await redis.setex(key, expiry, order_hash);
+    const order = JSON.stringify({
+      offer: offerPrice.toString(),
+      orderId: order_hash
+    })
+
+    await Promise.all([
+      redis.setex(orderKey, expiry, order),
+      redis.sadd(orderTrackingKey, orderKey),
+      redis.expire(orderTrackingKey, expiry)
+    ]);
+
     trackBidRate('opensea', taskId);
-
     const successMessage = opensea_traits ?
       `🎉 TRAIT OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${payload.criteria.collection.slug.toUpperCase()}  TRAIT: ${opensea_traits} 🎉`
       : `🎉 COLLECTION OFFER POSTED TO OPENSEA SUCCESSFULLY FOR: ${payload.criteria.collection.slug.toUpperCase()} 🎉`
@@ -496,6 +495,7 @@ async function submitOfferToOpensea(taskId: string, privateKey: string, slug: st
     } else {
       console.log("opensea post offer error", error?.response?.data || error?.message || error);
     }
+    throw error
   }
 }
 
@@ -519,7 +519,7 @@ async function buildOffer(buildPayload: any) {
     );
     return data
   } catch (error: any) {
-    console.log("opensea build offer error", error.response.data);
+    throw error
   }
 }
 
@@ -549,7 +549,7 @@ export async function cancelOrder(orderHash: string, protocolAddress: string, pr
     decrementBidCount('opensea', taskId)
     return response.data;
   } catch (error: any) {
-    return null;
+    console.log(error.response.data || error.message);
   }
 }
 
@@ -568,15 +568,18 @@ async function signCancelOrder(orderHash: string, protocolAddress: string, priva
       { name: 'orderHash', type: 'bytes32' }
     ]
   };
+
+  if (!orderHash) return
   const value = {
     orderHash: orderHash
   };
   try {
+
+    if (!value) return
     const signature = await wallet._signTypedData(domain, types, value);
     return signature;
   } catch (error) {
-    console.error("Error signing the cancel order message for order hash:", orderHash, error);
-    return null;
+    throw error
   }
 }
 
@@ -629,6 +632,8 @@ async function postItemOffer(offer: unknown, signature: string, slug: string) {
         await queue.resume()
       }
     }
+
+    throw error
   }
 }
 
@@ -711,7 +716,9 @@ export async function fetchOpenseaOffers(
         return { amount: 0, owner: "" };
       }
 
-      const bestOffer = data.offers?.sort((a: any, b: any) => +b.price.value - +a.price.value)[0]
+      const bestOffer = data.offers
+        .filter((data: any) => data.price.currency === "WETH")
+        .sort((a: any, b: any) => +b.price.value - +a.price.value)[0]
 
       return { amount: bestOffer?.price?.value, owner: bestOffer?.protocol_data?.parameters?.offerer };
 

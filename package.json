@@ -5,14 +5,14 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc",
-		"start": "tsc && node --expose-gc --max-old-space-size=8192 dist/src/index.js",
-		"dev": "nodemon",
+		"dev:start": "docker compose -f compose.redis.yaml up -d && tsc && node --expose-gc --max-old-space-size=8192 dist/src/index.js",
+		"start": "node --expose-gc --max-old-space-size=8192 dist/src/index.js",
+		"dev": "docker compose -f compose.redis.yaml up -d && nodemon",
 		"ci": "npm install --frozen-lockfile",
-		"dc:up": "docker compose up -d",
 		"dc:down": "docker compose down -v",
 		"dc:destroy": "docker compose down --volumes --remove-orphans --timeout 15",
 		"test": "nodemon test.ts",
-		"bench": "nodemon bench.js"
+		"dc:start": "docker compose up --build"
 	},
 	"keywords": [],
 	"author": "",

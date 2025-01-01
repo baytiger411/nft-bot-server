@@ -1,11 +1,9 @@
 import { ethers, Wallet } from "ethers";
 import { axiosInstance, limiter } from "../../init";
 import { config } from "dotenv";
-import { currentTasks, decrementBidCount, MAGENTA, redis, trackBidRate } from "../..";
-import redisClient from "../../utils/redis";
+import { currentTasks, decrementBidCount, errorStats, MAGENTA, redis, trackBidRate } from "../..";
 import { createBalanceChecker } from "../../utils/balance";
 import { DistributedLockManager } from '../../utils/lock';
-import { isAddress } from "ethers/lib/utils";
 
 const RED = '\x1b[31m';
 const RESET = '\x1b[0m';
@@ -14,7 +12,7 @@ const RESET = '\x1b[0m';
 config()
 
 const API_KEY = process.env.API_KEY
-const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY as string;
 const provider = new ethers.providers.AlchemyProvider('mainnet', ALCHEMY_API_KEY);
 
 
@@ -26,7 +24,7 @@ const deps = {
 const balanceChecker = createBalanceChecker(deps);
 
 const lockManager = new DistributedLockManager({
-  lockPrefix: 'magiceden:fetch:',
+  lockPrefix: '{magiceden}:fetch:',
   defaultTTLSeconds: 30
 });
 
@@ -93,9 +91,17 @@ export async function bidOnMagiceden(
       console.error('Error submitting signed order:', error);
     }
     return order
-  } catch (error) {
-    console.error('Error in bidOnMagiceden:', error);
-    return null;
+  } catch (error: any) {
+    console.log("magiceden post offer error: ", error.response.data || error.message);
+    if (!errorStats[taskId]) {
+      errorStats[taskId] = {
+        magiceden: 0,
+        opensea: 0,
+        blur: 0
+      }
+    }
+
+    errorStats[taskId]['magiceden']++
   }
 }
 
@@ -176,7 +182,7 @@ async function createBidData(
     ));
     return order;
   } catch (error: any) {
-    console.log(error?.response?.data || JSON.stringify(error));
+    throw error
   }
 }
 
@@ -232,7 +238,6 @@ async function signOrderData(wallet: ethers.Wallet, signData: any, trait?: Trait
     );
     return signature;
   } catch (error) {
-    console.error('Error in signOrderData:', error);
     throw error;
   }
 }
@@ -250,6 +255,9 @@ async function signOrderData(wallet: ethers.Wallet, signData: any, trait?: Trait
  */
 async function sendSignedOrderData(order: any, taskId: string, offerPrice: string | number, privateKey: string, bidCount: string, signature: string, data: any, slug: string, expiry = 900, trait?: Trait, tokenId?: number | string) {
   try {
+
+    const [taskId, count] = bidCount.split(":")
+
     const task = await currentTasks.find((task) =>
       task.contract.slug.toLowerCase() === slug.toLowerCase() &&
       task.selectedMarketplaces.includes("MagicEden")
@@ -278,59 +286,45 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
           `🎉 TRAIT OFFER POSTED TO MAGICEDEN SUCCESSFULLY FOR: ${slug.toUpperCase()} TRAIT: ${JSON.stringify(trait)} 🎉`
           : `🎉 OFFER POSTED TO MAGICEDEN SUCCESSFULLY FOR: ${slug.toUpperCase()} 🎉`
 
-      const orderKey =
-        tokenId ?
-          `${JSON.stringify(tokenId)}` :
-          trait
-            ? `${JSON.stringify(trait)}`
-            : "default"
+      const identifier = trait ? `${trait.attributeKey}:${trait.attributeValue}` : tokenId ? tokenId : 'collection';
 
-      const baseKey = `magiceden:order:${slug}:${orderKey}`;
-      const order = JSON.stringify(offerResponse);
+
+      const payload = JSON.stringify(offerResponse);
       const task = currentTasks.find((task) => task.contract.slug.toLowerCase() === slug.toLowerCase() && task.selectedMarketplaces.includes("MagicEden"))
-
       if (!task) {
-        return await cancelMagicEdenBid([order], privateKey, taskId)
+        return await cancelMagicEdenBid([payload], privateKey, taskId)
       }
-      const key = `${bidCount}:${baseKey}`;
       const bidExpiry = await getExpiry(task.bidDuration)
       const duration = bidExpiry / 60 || 15; // minutes
       const currentTime = new Date().getTime();
       const expiration = Math.floor((currentTime + (duration * 60 * 1000)) / 1000);
       const expiry = Math.ceil(Number(expiration) - (Date.now() / 1000))
 
-      const redisKey = trait ? `magiceden:${slug}:${JSON.stringify(trait)}` : tokenId ? `magiceden:${task.contract.slug}:${tokenId}` : `magiceden:${task.contract.slug}:collection`;
-      const offerKey = `${bidCount}:${redisKey}`
-      await redis.setex(key, expiry, order);
-      await redis.setex(offerKey, expiry, offerPrice.toString());
+      const orderTrackingKey = `{${taskId}}:magiceden:orders`;
+      const orderKey = `{${taskId}}:${count}:magiceden:order:${slug}:${identifier}`;
+
+      const order = JSON.stringify({
+        offer: offerPrice.toString(),
+        payload: payload
+      })
+
+      await Promise.all([
+        redis.sadd(orderTrackingKey, orderKey),
+        redis.setex(orderKey, expiry, order),
+        redis.expire(orderTrackingKey, expiry)
+      ]);
 
       trackBidRate("magiceden", taskId)
-      const countKey = `magiceden:${taskId}:count`;
-
-      await redis.incr(countKey);
-
-
       console.log(MAGENTA, successMessage, RESET);
       if (!task) {
         await cancelMagicEdenBid([order], privateKey, taskId)
       }
       return offerResponse;
     } catch (error: any) {
-      console.error(error.response.data); // Inavlid marketplace fee error
+      throw error
     }
   } catch (error: any) {
-    console.error('Error in sendSignedOrderData:', error.response.data);
-    return null;
-  }
-}
-
-const extractAddress = (message: string): string | null => {
-  try {
-    const match = message.match(/Expected: (0x[a-fA-F0-9]{40})/);
-    return match ? match[1] : null;
-  } catch (error) {
-    console.error('Error extracting address:', error);
-    return null;
+    throw error
   }
 }
 
@@ -439,26 +433,30 @@ export async function submitSignedOrderData(taskId: string, offerPrice: string |
       } else {
         console.error('Sign data not found in order steps.');
       }
+
     }
     const result = await sendSignedOrderData(order, taskId, offerPrice, privateKey, bidCount, signature, data, slug, expiry, trait, tokenId);
     return result;
   } catch (error: any) {
-    return null;
+    throw error
   }
 
 }
 
 export async function cancelMagicEdenBid(orderIds: string[], privateKey: string, taskId: string) {
   try {
-    const processedOrderIds = orderIds.map(orderId => {
+    if (!orderIds?.length) return;
+    const processedOrderIds = orderIds.map((orderId: any) => {
       try {
         const parsed = JSON.parse(orderId);
         return parsed.orderId || orderId;
       } catch {
         return orderId;
       }
-    });
-    if (!processedOrderIds.length) return
+    })?.filter(Boolean); // Remove any undefined/null values
+
+    if (!processedOrderIds.length) return;
+
     const { data } = await limiter.schedule(() => axiosInstance.post<MagicEdenCancelOfferCancel>(
       'https://api.nfttools.website/magiceden/v3/rtp/ethereum/execute/cancel/v3',
       { orderIds: processedOrderIds },
@@ -485,7 +483,11 @@ export async function cancelMagicEdenBid(orderIds: string[], privateKey: string,
       },
       "primaryType": "OrderHashes"
     }
-    const signature = await signCancelOrder(cancelData, privateKey)
+    const signature = await signCancelOrder(cancelData, privateKey);
+    if (!signature) {
+      console.error('Failed to generate signature for cancel order');
+      return;
+    }
     const body = cancelStep?.items[0].data.post.body
     const cancelBody = cancelItem ? body : {
       orderIds: processedOrderIds
@@ -503,16 +505,15 @@ export async function cancelMagicEdenBid(orderIds: string[], privateKey: string,
         }
       }
     ))
-
     console.log(JSON.stringify(cancelResponse));
+    console.log(`Successfully cancelled ${orderIds.length} MagicEden bids for task: ${taskId}`.toUpperCase());
 
-    // Decrement bid count for each cancelled order
     orderIds.forEach(() => {
       decrementBidCount('magiceden', taskId);
     });
 
-    console.log('Successfully cancelled MagicEden bids');
   } catch (error: any) {
+    console.log(error.response.data || error.message);
   }
 }
 
@@ -524,6 +525,7 @@ async function signCancelOrder(cancelItem: any | undefined, privateKey: string) 
       return
     }
     const wallet = new Wallet(privateKey, provider);
+
     const signature = await wallet._signTypedData(
       cancelItem.domain,
       cancelItem.types,
@@ -532,8 +534,7 @@ async function signCancelOrder(cancelItem: any | undefined, privateKey: string) 
 
     return signature;
   } catch (error) {
-    console.log(error);
-
+    throw error
   }
 }
 
@@ -584,7 +585,7 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
         })
       );
 
-      const offer = data?.orders
+      const offer = data?.orders?.filter((data) => data.price.currency.symbol === "WETH")
       if (!offer?.length) return { amount: "0", owner: "" }
       return { amount: offer[0].price.amount.raw || "0", owner: offer[0].maker }
 
@@ -614,14 +615,13 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
           }
         }
       ));
-      const orders = data.orders[0]
-      if (!orders) return { amount: "0", owner: "" }
+      const orders = data?.orders?.filter(data => data.price.currency.symbol === "WETH")[0]
+      if (!orders) return { amount: "0", owner: "" }      
       return { amount: orders.price.amount.raw, owner: orders.maker }
     }
     return { amount: "0", owner: "" }
   } catch (error: any) {
-    console.log(error);
-    return { amount: "0", owner: "" }
+    throw error
   }
 }
 
@@ -712,20 +712,15 @@ export async function fetchMagicEdenTokens(collectionId: string, limit?: number)
 }
 
 function getExpiry(bidDuration: { value: number; unit: string }) {
-  try {
-    const expiry = bidDuration.unit === 'minutes'
-      ? bidDuration.value * 60
-      : bidDuration.unit === 'hours'
-        ? bidDuration.value * 3600
-        : bidDuration.unit === 'days'
-          ? bidDuration.value * 86400
-          : 900;
+  const expiry = bidDuration.unit === 'minutes'
+    ? bidDuration.value * 60
+    : bidDuration.unit === 'hours'
+      ? bidDuration.value * 3600
+      : bidDuration.unit === 'days'
+        ? bidDuration.value * 86400
+        : 900;
 
-    return expiry;
-  } catch (error) {
-    console.error('Error calculating expiry:', error);
-    return 900; // Default to 15 minutes
-  }
+  return expiry;
 }
 
 interface TokenMagiceden {

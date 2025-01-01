@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
-import { Redis, Cluster } from 'ioredis';
-import { axiosInstance, limiter } from "../init";
+import { Cluster } from 'ioredis';
 import { DistributedLockManager } from './lock';
 import RedisClient from './redis';
 
@@ -32,7 +31,7 @@ class BalanceChecker {
     this.deps = deps;
     this.redis = RedisClient.getClient();
     this.lockManager = new DistributedLockManager({
-      lockPrefix: 'balance_lock:',
+      lockPrefix: '{balance_lock}:',
       defaultTTLSeconds: CACHE_EXPIRY_SECONDS
     });
   }
@@ -103,21 +102,6 @@ class BalanceChecker {
     return result ?? (cachedBalance ?? 0);
   }
 
-  private extractBalanceFromResponse(data: any, cachedBalance: number | null = 0): number {
-    if (!data?.data?.wallet?.wrappedCurrencyFunds?.quantity) {
-      console.warn('Unexpected response structure:', data);
-      return cachedBalance ?? 0;
-    }
-
-    const balance = Number(data.data.wallet.wrappedCurrencyFunds.quantity);
-    if (isNaN(balance)) {
-      console.warn('Invalid balance value:', data.data.wallet.wrappedCurrencyFunds.quantity);
-      return cachedBalance ?? 0;
-    }
-
-    return balance;
-  }
-
   async getBethBalance(address: string): Promise<number> {
     const cacheKey = `beth_balance:${address}`;
     let cachedBalance = await this.getCachedBalance(cacheKey);
@@ -125,7 +109,6 @@ class BalanceChecker {
     const result = await this.lockManager.withLock(
       `beth_${address}`,
       async () => {
-        // Check cache again after acquiring lock
         const cachedBalanceAfterLock = await this.getCachedBalance(cacheKey);
         if (cachedBalanceAfterLock !== null) {
           return cachedBalanceAfterLock;
@@ -137,7 +120,6 @@ class BalanceChecker {
           this.deps.provider
         );
 
-        // Retry logic with exponential backoff
         const maxRetries = 3;
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
           try {

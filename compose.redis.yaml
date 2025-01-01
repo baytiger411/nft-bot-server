@@ -1,24 +1,4 @@
 services:
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3003:3003"
-    depends_on:
-      - mongodb
-      - redis-cluster-init
-    environment:
-      - PORT=3003
-      - REDIS_NODES=[{"host":"redis-node-1","port":6379},{"host":"redis-node-2","port":6379},{"host":"redis-node-3","port":6379},{"host":"redis-node-4","port":6379},{"host":"redis-node-5","port":6379},{"host":"redis-node-6","port":6379}]
-      - REDIS_NET_MAP={"redis-node-1:6379":{"host":"redis-node-1","port":6379},"redis-node-2:6379":{"host":"redis-node-2","port":6379},"redis-node-3:6379":{"host":"redis-node-3","port":6379},"redis-node-4:6379":{"host":"redis-node-4","port":6379},"redis-node-5:6379":{"host":"redis-node-5","port":6379},"redis-node-6:6379":{"host":"redis-node-6","port":6379}}
-      - ALCHEMY_API_KEY=Rt6ZtAeAJ0TzeLr85vIsnz1nqiGlktdd
-      - MONGODB_URI=mongodb://mongodb:27017/BIDDING_BOT
-      - API_KEY=d3348c68-097d-48b5-b5f0-0313cc05e92d
-      - RATE_LIMIT=100
-    networks:
-      - redis-cluster
-
   redis-node-1:
     image: "redis:latest"
     container_name: "redis_node_1"
@@ -133,10 +113,10 @@ services:
     command: >
       /bin/sh -c '
         echo "Waiting for Redis nodes..." &&
-        sleep 20 &&
-        redis-cli --cluster create redis-node-1:6379 redis-node-2:6379 redis-node-3:6379 redis-node-4:6379 redis-node-5:6379 redis-node-6:6379  --cluster-replicas 1 --cluster-yes &&
+        sleep 15 &&
+        redis-cli --cluster create redis-node-1:6379 redis-node-2:6379 redis-node-3:6379 redis-node-4:6379 redis-node-5:6379 redis-node-6:6379 --cluster-replicas 1 --cluster-yes &&
         echo "Waiting for cluster to stabilize..." &&
-        sleep 10 &&
+        sleep 5 &&
         redis-cli -h redis-node-1 cluster info &&
         redis-cli -h redis-node-1 cluster nodes &&
         echo "Cluster initialization complete"
@@ -148,23 +128,6 @@ services:
       - redis-node-4
       - redis-node-5
       - redis-node-6
-
-    networks:
-      - redis-cluster
-
-  cluster-health-check:
-    image: "redis:latest"
-    depends_on:
-      - redis-cluster-init
-    command: >
-      /bin/sh -c '
-        until redis-cli -h redis-node-1 cluster info | grep -q "cluster_state:ok"; do
-          echo "Waiting for Redis cluster to be ready..."
-          sleep 2
-        done;
-        echo "Redis cluster is ready!"
-        exit 0
-      '
     networks:
       - redis-cluster
 
@@ -177,12 +140,6 @@ services:
       - mongodb_data:/data/db
     networks:
       - redis-cluster
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
 
 volumes:
   redis_data_1:

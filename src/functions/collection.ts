@@ -11,7 +11,7 @@ const collectionCache: { [key: string]: any } = {};
 const MAX_CACHE_ITEMS = 1000;
 
 const lockManager = new DistributedLockManager({
-  lockPrefix: 'collection:fetch:',
+  lockPrefix: '{collection}:fetch:',
   defaultTTLSeconds: 30
 });
 
@@ -90,12 +90,12 @@ export async function getCollectionDetails(slug: string) {
 }
 
 export async function getCollectionStats(collectionSlug: string) {
-  const cacheKey = `collectionStats:${collectionSlug}`;
+  const cacheKey = `{collectionStats:${collectionSlug}}`;
   const cachedData = await redis.get(cacheKey);
   if (cachedData) {
     return JSON.parse(cachedData);
   }
-  const lockKey = `collectionStats:${collectionSlug}`;
+  const lockKey = `{collectionStats:${collectionSlug}}`;
   const result = await lockManager.withLock<CollectionStats>(
     lockKey,
     async () => {
@@ -126,7 +126,7 @@ export async function getCollectionEvents(
   eventTypes: string[] = ['all', 'cancel', 'listing', 'offer', 'order', 'sale', 'transfer'],
   limit: number = 50
 ) {
-  const cacheKey = `collectionEvents:${collectionSlug}:${eventTypes.join(',')}:${limit}`;
+  const cacheKey = `{collectionEvents:${collectionSlug}:${eventTypes.join(',')}}:${limit}`;
   const cachedData = await redis.get(cacheKey);
   if (cachedData) {
     return JSON.parse(cachedData);

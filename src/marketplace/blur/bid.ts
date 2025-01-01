@@ -1,33 +1,26 @@
 import { BigNumber, ethers, utils, Wallet } from "ethers";
-import { axiosInstance, limiter, RATE_LIMIT } from "../../init";
-import redisClient from "../../utils/redis";
-import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, decrementBidCount, queue, redis, RESET, trackBidRate } from "../..";
+import { axiosInstance, limiter } from "../../init";
+import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, decrementBidCount, errorStats, queue, redis, RESET, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
-import { Job, Queue } from "bullmq";
+import { Job } from "bullmq";
 import { DistributedLockManager } from "../../utils/lock";
 const RED = '\x1b[31m';
-const YELLOW = '\x1b[33m';
 
 config()
-
 const API_KEY = process.env.API_KEY as string;
-
 const BLUR_API_URL = 'https://api.nfttools.website/blur';
-
-const ALCHEMY_API_KEY = "HGWgCONolXMB2op5UjPH1YreDCwmSbvx"
-
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY as string;
 
 const deps = {
   redis: redis,
   provider: new ethers.providers.AlchemyProvider("mainnet", ALCHEMY_API_KEY),
 };
 const balanceChecker = createBalanceChecker(deps);
-
 const provider = new ethers.providers.AlchemyProvider('mainnet', ALCHEMY_API_KEY);
 
 const lockManager = new DistributedLockManager({
-  lockPrefix: 'blur:lock:',
+  lockPrefix: '{blur}:lock:',
   defaultTTLSeconds: 60 // 1 minute lock timeout
 });
 
@@ -65,7 +58,6 @@ export async function bidOnBlur(
 
   offerPriceEth = (Math.floor(Number(utils.formatUnits(offerPrice)) * 100) / 100).toFixed(2);
 
-
   if (Number(offerPriceEth) === 0) {
     console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
     console.log(RED + `Offer price is less than the minimum Blur offer price. SKIPPING ...`.toUpperCase() + RESET);
@@ -100,8 +92,15 @@ export async function bidOnBlur(
     build = await formatBidOnBlur(BLUR_API_URL, accessToken, wallet_address, buildPayload);
 
   } catch (error: any) {
-    console.error('Error formatting bid on Blur:', error.message);
-    return;
+    if (!errorStats[taskId]) {
+      errorStats[taskId] = {
+        magiceden: 0,
+        opensea: 0,
+        blur: 0
+      }
+    }
+    errorStats[taskId]['blur']++
+    return
   }
 
   let data = build?.signatures?.[0];
@@ -110,7 +109,6 @@ export async function bidOnBlur(
     data = build?.signatures?.[0];
   }
   if (!data) {
-    console.error('Invalid response after retry');
     return;
   }
 
@@ -139,11 +137,17 @@ export async function bidOnBlur(
       ]
     }
 
-    await submitBidToBlur(taskId, bidCount, BLUR_API_URL, accessToken, wallet_address, submitPayload, slug, cancelPayload, expiry, traits);
-    // add offer keys
+    await submitBidToBlur(taskId, bidCount, offer_price, BLUR_API_URL, accessToken, wallet_address, submitPayload, slug, cancelPayload, expiry, traits);
 
   } catch (error: any) {
-    console.error("Error in bidOnBlur:", error.message);
+    console.log("blur post offer error: ", error.response.data || error.message);
+    if (!errorStats[taskId]) {
+      errorStats[taskId] = {
+        magiceden: 0,
+        opensea: 0,
+        blur: 0
+      }
+    }
   }
 };
 
@@ -165,7 +169,7 @@ async function getAccessToken(url: string, private_key: string): Promise<string 
     };
 
     try {
-      const key = `blur-access-token-${wallet.address}`
+      const key = `{blurAccessToken}:${wallet.address}`
       const cachedToken = await redis.get(key);
       if (cachedToken) {
         return cachedToken;
@@ -189,8 +193,7 @@ async function getAccessToken(url: string, private_key: string): Promise<string 
 
       return accessToken;
     } catch (error: any) {
-      console.error("getAccessToken Error:", error.response?.data || error.message);
-      return undefined;
+      throw error
     }
   });
 };
@@ -225,14 +228,13 @@ async function formatBidOnBlur(
     );
     return data;
   } catch (error: any) {
-
     if (error.response?.data?.message === 'Balance over-utilized' || error.message?.message === 'Balance over-utilized') {
       console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
       console.log(RED + 'BALANCE OVER-UTILIZED: BETH balance is being used in too many active orders' + RESET);
       console.log(RED + '-----------------------------------------------------------------------------------------------------------' + RESET);
       return;
     }
-    // console.error("Error formatting bid " + `${JSON.stringify(buildPayload)}`, error.response?.data || error.message);
+    throw error
   }
 }
 
@@ -247,6 +249,7 @@ async function formatBidOnBlur(
 async function submitBidToBlur(
   taskId: string,
   bidCount: string,
+  offer_price: BigNumber | bigint,
   url: string,
   accessToken: string,
   walletAddress: string,
@@ -280,17 +283,31 @@ async function submitBidToBlur(
       console.error('Error:', JSON.stringify(offers.errors));
     } else {
       console.log("\x1b[33m", successMessage, RESET);
-      const orderKey = traits
-        ? `${traits}`
-        : "default"
 
-      const baseKey = `blur:order:${slug}:${orderKey}`;
-      const key = `${bidCount}:${baseKey}`;
+      let identifier = ''
+      if (traits) {
+        const traitsObj = JSON.parse(traits);
+        const [traitType, traitValue] = Object.entries(traitsObj)[0];
+        identifier = `${traitType}:${traitValue}`
+      } else {
+        identifier = "collection"
+      }
+      const [taskId, count] = bidCount.split(":")
+      const orderTrackingKey = `{${taskId}}:blur:orders`;
+      const orderKey = `{${taskId}}:${count}:blur:order:${slug}:${identifier}`;
 
-      await redis.setex(key, expiry, JSON.stringify(cancelPayload));
+      const order = JSON.stringify({
+        offer: offer_price.toString(),
+        payload: cancelPayload
+      })
+
+      await Promise.all([
+        redis.setex(orderKey, expiry, order),
+        redis.sadd(orderTrackingKey, orderKey),
+        redis.expire(orderTrackingKey, expiry)
+      ]);
+
       trackBidRate("blur", taskId)
-      const countKey = `blur:${taskId}:count`;
-      await redis.incr(countKey);
     }
   } catch (error: any) {
     if (error.response?.data?.message?.message === 'Balance over-utilized' || error.message.message === 'Balance over-utilized') {
@@ -302,12 +319,13 @@ async function submitBidToBlur(
       if (blurJobs.length > 0) {
         await queue.pause()
         await Promise.all(blurJobs.map(job => job.remove()));
-        console.log(RED + `DELAYING ${blurJobs.length} BLUR JOB(S) BY 5 MINUTES DUE TO INSUFFICIENT BETH BALANCE` + RESET);
+        console.log(RED + `REMOVING ${blurJobs.length} BLUR JOB(S) DUE TO INSUFFICIENT BETH BALANCE` + RESET);
         await queue.resume()
       }
     } else {
       console.error("Error submitting bid:", error.response?.data || error.message);
     }
+    throw error
   }
 }
 
@@ -327,16 +345,14 @@ export async function cancelBlurBid(data: BlurCancelPayload) {
         'X-NFT-API-Key': API_KEY,
       }
     }))
+    decrementBidCount('blur', taskId);
     console.log(JSON.stringify(cancelResponse));
 
-    // Decrement bid count after successful cancellation
-    decrementBidCount('blur', taskId);
-
-    console.log('Successfully cancelled Blur bid');
   } catch (error: any) {
     if (error.response?.data?.message?.message !== 'No bids found') {
       console.log("cancelBlurBid: ", error?.response?.data || error);
     }
+    console.log(error.response.data || error.message);
   }
 }
 
@@ -414,23 +430,10 @@ interface BlurCancelPayload {
   taskId: string;
 }
 
-
-interface Criteria {
-  type: string;
-  value: {
-    [key: string]: string; // Adjust the type if you have specific keys
-  };
-}
-
-interface CriteriaPrice {
-  price: string;
-  criteria: Criteria;
-}
-
 interface BlurBidResponse {
   success: boolean;
   signatures: Signature[];
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 }
 
 interface Signature {
@@ -439,7 +442,7 @@ interface Signature {
   marketplace: string;
   marketplaceData: string;
   tokens: any[];
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
@@ -447,7 +450,7 @@ interface SignData {
   domain: Domain;
   types: Types;
   value: Value;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
@@ -456,27 +459,26 @@ interface Domain {
   version: string;
   chainId: string;
   verifyingContract: string;
-  [key: string]: any; // Allow additional properties
-
+  [key: string]: any;
 }
 
 interface Types {
   Order: OrderType[];
   FeeRate: FeeRateType[];
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 interface OrderType {
   name: string;
   type: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
 interface FeeRateType {
   name: string;
   type: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
@@ -491,41 +493,25 @@ interface Value {
   salt: string;
   orderType: number;
   nonce: Nonce;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
 interface MakerFee {
   recipient: string;
   rate: number;
-  [key: string]: any; // Allow additional properties
-
+  [key: string]: any;
 }
 
 interface Nonce {
   type: string;
   hex: string;
-  [key: string]: any; // Allow additional properties
+  [key: string]: any;
 
 }
 
 interface SubmitPayload {
   signature: string;
   marketplaceData: string[];
-  [key: string]: any; // Allow additional properties
-}
-
-
-interface BlurCollectionPriceLevel {
-  criteriaType: string;
-  criteriaValue: Record<string, any>;
-  price: string;
-  executableSize: number;
-  numberBidders: number;
-  bidderAddressesSample: string[];
-}
-
-interface BlurResponse {
-  success: boolean;
-  priceLevels: BlurCollectionPriceLevel[];
+  [key: string]: any;
 }
