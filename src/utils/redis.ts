@@ -140,10 +140,6 @@ class RedisClient {
       console.log('Redis Cluster connecting...');
     });
 
-    this.client.on('reconnecting', () => {
-      console.log('Redis Cluster reconnecting...');
-    });
-
     this.client.on('node error', (err: Error, node: any) => {
       console.error('Redis Cluster Node Error:', err.message);
       if (node) {

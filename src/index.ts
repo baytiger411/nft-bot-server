@@ -6,6 +6,8 @@ import os from "os"
 import cors from "cors";
 import WebSocket, { Server as WebSocketServer } from 'ws';
 import http from 'http';
+import fs from 'fs/promises';
+import path from 'path';
 import { initialize } from "./init";
 import { bidOnOpensea, cancelOrder, fetchOpenseaListings, fetchOpenseaOffers, IFee } from "./marketplace/opensea";
 import { bidOnBlur, cancelBlurBid, fetchBlurBid, fetchBlurCollectionStats } from "./marketplace/blur/bid";
@@ -19,6 +21,8 @@ import redisClient from "./utils/redis";
 import { WETH_CONTRACT_ADDRESS, WETH_MIN_ABI } from "./constants";
 import { BigNumber, constants, Contract, ethers, utils, Wallet as Web3Wallet } from "ethers";
 import { DistributedLockManager } from "./utils/lock";
+import { exec } from "child_process";
+import { execSync } from "child_process";
 
 let RATE_LIMIT = Number(process.env.RATE_LIMIT);
 let API_KEY = process.env.API_KEY;
@@ -270,20 +274,24 @@ setInterval(monitorHealth, HEALTH_CHECK_INTERVAL);
 
 // Update cleanup function to handle multiple workers
 async function cleanup() {
-  console.log(YELLOW + '\n=== Starting Cleanup ===');
+  try {
+    console.log(YELLOW + '\n=== Starting Cleanup ===');
+    // Clear task locks
+    taskLockMap.clear();
+    console.log('Cleared task locks...');
 
-  // Clear task locks
-  taskLockMap.clear();
-  console.log('Cleared task locks...');
+    console.log('Closing workers...');
+    await Promise.all(workers.map(worker => worker.close()));
 
-  console.log('Closing workers...');
-  await Promise.all(workers.map(worker => worker.close()));
+    console.log('Closing queue...');
+    await queue.close();
 
-  console.log('Closing queue...');
-  await queue.close();
+    console.log(GREEN + '=== Cleanup Complete ===\n' + RESET);
+    await redis.disconnect();
 
-  console.log(GREEN + '=== Cleanup Complete ===\n' + RESET);
-  process.exit(0);
+  } catch (error) {
+    console.error(RED + 'Error during cleanup:' + RESET, error);
+  }
 }
 
 
@@ -491,6 +499,12 @@ wss.on('connection', async (ws) => {
         case 'update-config':
           await updateConfig(message.data)
           break
+        case 'shutdown':
+          await handleShutdown();
+          break;
+        case 'update':
+          await handleUpdate();
+          break;
         default:
           console.warn(YELLOW + `Unknown endpoint: ${message.endpoint}` + RESET);
       }
@@ -505,11 +519,6 @@ wss.on('connection', async (ws) => {
     console.log(YELLOW + 'WebSocket connection closed' + RESET);
   };
 });
-
-
-import fs from 'fs/promises';
-import path from 'path';
-import { log } from "console";
 
 async function updateConfig(data: any) {
   try {
@@ -1728,6 +1737,9 @@ async function unsubscribeFromCollection(task: ITask) {
 
 async function updateMarketplace(task: ITask) {
   try {
+
+    console.log({ task: task._id });
+
     const { _id: taskId, selectedMarketplaces: newMarketplaces } = task;
     const taskIndex = currentTasks?.findIndex(task => task?._id === taskId);
 
@@ -4864,3 +4876,140 @@ async function manageQueueHealth() {
   }
 }
 setInterval(manageQueueHealth, 10000);
+
+// Add this new function
+async function handleShutdown() {
+  try {
+    console.log(YELLOW + '\n=== Starting Server Shutdown ===' + RESET);
+    // Stop all tasks
+    console.log('Stopping all running tasks...');
+    const runningTasks = Array.from(activeTasks.values()).filter(task => task.running);
+    await Promise.all(runningTasks.map(task => stopTask(task, false)));
+
+    // Clean up resources
+    console.log('Cleaning up resources...');
+    await cleanup();
+
+    // Run docker-compose down with timeout
+    console.log('Shutting down Docker containers...');
+    await new Promise((resolve, reject) => {
+      const dockerDown = exec('docker compose down', { timeout: 30000 }, (error: Error | null) => {
+        if (error) {
+          console.error(RED + 'Error shutting down Docker containers:' + RESET, error);
+          reject(error);
+        } else {
+          console.log(GREEN + 'Docker containers shut down successfully' + RESET);
+          resolve(true);
+        }
+      });
+
+      // Pipe Docker output to console
+      dockerDown.stdout?.pipe(process.stdout);
+      dockerDown.stderr?.pipe(process.stderr);
+    });
+
+    console.log(GREEN + '=== Server Shutdown Complete ===' + RESET);
+
+
+    process.nextTick(() => process.exit(0));
+    process.nextTick(() => process.exit(1));
+
+  } catch (error) {
+    console.error(RED + 'Error during shutdown:' + RESET, error);
+    // Try force shutdown of Docker even if other shutdown steps failed
+    try {
+      execSync('docker-compose down -v --remove-orphans --timeout 30');
+    } catch (dockerError) {
+      console.error(RED + 'Failed to force shutdown Docker containers:' + RESET, dockerError);
+    }
+    process.exit(1);
+  }
+}
+
+// Add signal handlers with a timeout to force exit if shutdown takes too long
+['SIGTERM', 'SIGINT'].forEach(signal => {
+  process.on(signal, () => {
+    console.log(YELLOW + `\nReceived ${signal}, starting graceful shutdown...` + RESET);
+
+    // Force exit after 60 seconds if graceful shutdown hasn't completed
+    const forceExitTimeout = setTimeout(() => {
+      console.error(RED + '\nForce exiting after timeout...' + RESET);
+      process.exit(1);
+
+    }, 60000);
+
+    // Clear timeout if shutdown completes normally
+    handleShutdown().finally(() => clearTimeout(forceExitTimeout));
+  });
+});
+
+// Add signal handlers
+process.on('SIGTERM', handleShutdown);
+process.on('SIGINT', handleShutdown);
+
+async function handleUpdate() {
+  try {
+    console.log(YELLOW + '\n=== Starting Update Process ===' + RESET);
+
+    // Stop all tasks
+    console.log('Stopping all running tasks...');
+    const runningTasks = Array.from(activeTasks.values()).filter(task => task.running);
+    await Promise.all(runningTasks.map(task => stopTask(task, false)));
+
+    // Clean up resources
+    console.log('Cleaning up resources...');
+    await cleanup();
+
+    // Shut down Docker containers
+    console.log('Shutting down Docker containers...');
+    await new Promise((resolve, reject) => {
+      const dockerDown = exec('docker compose down', { timeout: 30000 }, (error: Error | null) => {
+        if (error) {
+          console.error(RED + 'Error shutting down Docker containers:' + RESET, error);
+          reject(error);
+        } else {
+          console.log(GREEN + 'Docker containers shut down successfully' + RESET);
+          resolve(true);
+        }
+      });
+
+      dockerDown.stdout?.pipe(process.stdout);
+      dockerDown.stderr?.pipe(process.stderr);
+    });
+
+    // Start update process
+    console.log('Starting update process...');
+    const updateCommand = 'docker compose -f compose.redis.yaml up -d && tsc && node --expose-gc --max-old-space-size=8192 dist/src/index.js';
+
+    // Execute update command in a new process with filtered output
+    const child = exec(updateCommand, (error: Error | null) => {
+      if (error && !error.message.includes('EADDRINUSE')) {
+        console.error(RED + 'Error during update process:' + RESET, error);
+      }
+    });
+
+    // Filter out EADDRINUSE errors from stdout/stderr
+    child.stdout?.on('data', (data) => {
+      if (!data.toString().includes('EADDRINUSE')) {
+        process.stdout.write(data);
+      }
+    });
+
+    child.stderr?.on('data', (data) => {
+      if (!data.toString().includes('EADDRINUSE')) {
+        process.stderr.write(data);
+      }
+    });
+
+    // Wait briefly to ensure new process starts
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Exit current process
+    console.log(GREEN + 'Update process started, shutting down current instance...' + RESET);
+
+  } catch (error) {
+    if (error instanceof Error && !error.message.includes('EADDRINUSE')) {
+      console.error(RED + 'Error during update process:' + RESET, error);
+    }
+  }
+}
