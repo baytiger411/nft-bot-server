@@ -10,7 +10,7 @@
 		"dev": "docker compose -f compose.redis.yaml up -d && nodemon",
 		"ci": "npm install --frozen-lockfile",
 		"dc:down": "docker compose down -v",
-		"dc:destroy": "docker compose down --volumes --remove-orphans --timeout 15",
+		"dc:destroy": "docker stop $(docker ps -aq) || true sleep 3 docker compose down --volumes --remove-orphans --timeout 15 && docker system prune -af --volumes",
 		"test": "nodemon test.ts",
 		"dc:start": "docker compose up --build"
 	},

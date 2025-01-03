@@ -1,6 +1,6 @@
 import { BigNumber, ethers, utils, Wallet } from "ethers";
 import { axiosInstance, limiter } from "../../init";
-import { BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, decrementBidCount, errorStats, queue, redis, RESET, trackBidRate } from "../..";
+import { activeTasks, BLUR_SCHEDULE, BLUR_TRAIT_BID, currentTasks, decrementBidCount, errorStats, queue, redis, RESET, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job } from "bullmq";
@@ -260,6 +260,11 @@ async function submitBidToBlur(
   traits?: string
 ) {
   try {
+    const [taskId, count] = bidCount.split(":")
+
+    const currentTask = activeTasks.get(taskId)
+    if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes("BLUR".toLowerCase())) return
+
     let running = currentTasks.find((task) => task.contract.slug.toLowerCase() === slug.toLowerCase())
     if (!running) return
     const { data: offers } = await limiter.schedule(() =>
@@ -292,7 +297,6 @@ async function submitBidToBlur(
       } else {
         identifier = "collection"
       }
-      const [taskId, count] = bidCount.split(":")
       const orderTrackingKey = `{${taskId}}:blur:orders`;
       const orderKey = `{${taskId}}:${count}:blur:order:${slug}:${identifier}`;
 

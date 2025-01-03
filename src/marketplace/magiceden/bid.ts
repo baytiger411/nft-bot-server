@@ -1,13 +1,12 @@
 import { ethers, Wallet } from "ethers";
 import { axiosInstance, limiter } from "../../init";
 import { config } from "dotenv";
-import { currentTasks, decrementBidCount, errorStats, MAGENTA, redis, trackBidRate } from "../..";
+import { activeTasks, currentTasks, decrementBidCount, errorStats, MAGENTA, redis, trackBidRate } from "../..";
 import { createBalanceChecker } from "../../utils/balance";
 import { DistributedLockManager } from '../../utils/lock';
 
 const RED = '\x1b[31m';
 const RESET = '\x1b[0m';
-
 
 config()
 
@@ -268,6 +267,11 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
       ? "https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v3"
       : "https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v4"
 
+
+    // check if the tasks is still active before you make the offer
+    const currentTask = activeTasks.get(taskId)
+    if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes("MAGICEDEN".toLowerCase())) return
+
     try {
       const { data: offerResponse } = await limiter.schedule(() =>
         axiosInstance.post(
@@ -309,8 +313,8 @@ async function sendSignedOrderData(order: any, taskId: string, offerPrice: strin
       })
 
       await Promise.all([
-        redis.sadd(orderTrackingKey, orderKey),
         redis.setex(orderKey, expiry, order),
+        redis.sadd(orderTrackingKey, orderKey),
         redis.expire(orderTrackingKey, expiry)
       ]);
 
@@ -616,7 +620,7 @@ export async function fetchMagicEdenOffer(type: "COLLECTION" | "TRAIT" | "TOKEN"
         }
       ));
       const orders = data?.orders?.filter(data => data.price.currency.symbol === "WETH")[0]
-      if (!orders) return { amount: "0", owner: "" }      
+      if (!orders) return { amount: "0", owner: "" }
       return { amount: orders.price.amount.raw, owner: orders.maker }
     }
     return { amount: "0", owner: "" }

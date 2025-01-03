@@ -61,6 +61,9 @@ const COLLECTION_BID_PRIORITY = {
 };
 config()
 
+type JobState = 'completed' | 'failed' | 'delayed' | 'active' | 'waiting' | 'waiting-children' | 'unknown' | 'prioritized' | 'paused';
+const REMOVABLE_STATES: JobState[] = ['prioritized', 'delayed', 'waiting', 'paused'];
+
 const lockManager = new DistributedLockManager({
   lockPrefix: '{marketplace}:',
   defaultTTLSeconds: 60
@@ -103,7 +106,7 @@ const workers = Array.from({ length: WORKER_COUNT }, (_, index) => new Worker(
   {
     connection: redis,
     prefix: '{bull}',
-    concurrency: RATE_LIMIT,
+    concurrency: RATE_LIMIT / WORKER_COUNT,
     lockDuration: 30000,
     stalledInterval: 30000,
     maxStalledCount: 1,
@@ -446,7 +449,7 @@ startServer()
 
 
 function broadcastBidRates() {
-  const bidRates = getAllBidRates();
+  const bidRates = activeTasks.size > 0 ? getAllBidRates() : 0;
   const message = JSON.stringify({
     type: 'bidRatesUpdate',
     data: { bidRates, bidCounts: bidStats, skipCounts: skipStats, errorCounts: errorStats }
@@ -1397,7 +1400,10 @@ async function stopTask(task: ITask, start: boolean, marketplace?: string) {
     await cancelAllRelatedBids(task, marketplace)
     await removePendingAndWaitingBids(task, marketplace)
     await waitForRunningJobsToComplete(task, marketplace)
-    await cancelAllRelatedBids(task, marketplace)
+
+    setTimeout(() => {
+      cancelAllRelatedBids(task, marketplace)
+    }, 5000)
 
   } catch (error) {
     console.error(RED + `Error in stopTask for ${task.contract.slug}: ` + RESET, error);
@@ -1447,19 +1453,26 @@ async function removePendingAndWaitingBids(task: ITask, marketplace?: string) {
           );
 
           if (jobs.length === 0) return null;
-
           // Process jobs in parallel with rate limiting
           await Promise.all(jobs.map(async (job) => {
             if (!job?.id) return;
+
             if (jobIds.includes(job.id)) {
               try {
                 const state = await job.getState();
-                if (state === "prioritized" || state === "delayed" || state === "waiting") {
+
+                if (REMOVABLE_STATES.includes(state as JobState)) {
                   await job.remove();
                   totalJobsRemoved++;
+                } else {
+                  console.log(`Skipping job ${job.id} in state: ${state}`);
                 }
               } catch (error) {
-                console.error(RED + `Error removing job ${job.id}: ` + RESET, error);
+                console.error(RED + `Error processing job ${job.id}: ` + RESET, error);
+                // Optionally add specific error handling here
+                if (error instanceof Error) {
+                  console.error(`Error details: ${error.message}`);
+                }
               }
             }
           }));
@@ -1737,8 +1750,6 @@ async function unsubscribeFromCollection(task: ITask) {
 
 async function updateMarketplace(task: ITask) {
   try {
-
-    console.log({ task: task._id });
 
     const { _id: taskId, selectedMarketplaces: newMarketplaces } = task;
     const taskIndex = currentTasks?.findIndex(task => task?._id === taskId);
@@ -4068,24 +4079,6 @@ async function bulkCancelOpenseaBid(data: { privateKey: string, orderId: string,
     ])
   } catch (error) {
     console.error(RED + `Error processing Opensea bid cancellation for task: ${taskId} ` + RESET, error);
-  }
-}
-
-async function cleanupMagicedenKeys(keys: string[]) {
-  try {
-    const offerKeys = keys.map(key => key.replace(':order:', ':offer:'));
-    const allKeys = [...keys, ...offerKeys];
-
-    const deleteResults = await Promise.allSettled(
-      allKeys.map(key => redis.del(key))
-    );
-
-    deleteResults.filter(
-      result => result.status === 'fulfilled'
-    ).length;
-
-  } catch (error) {
-    console.error('Error cleaning up Magiceden keys across cluster:', error);
   }
 }
 

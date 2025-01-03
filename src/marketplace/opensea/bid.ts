@@ -1,7 +1,7 @@
 import { BigNumber, Contract, ethers, Wallet } from "ethers";
 import { SEAPORT_CONTRACT_ADDRESS, SEAPORT_MIN_ABI, WETH_MIN_ABI } from "../../constants";
 import { axiosInstance, limiter } from "../../init";
-import { BLUE, currentTasks, decrementBidCount, errorStats, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
+import { activeTasks, BLUE, currentTasks, decrementBidCount, errorStats, OPENSEA_SCHEDULE, OPENSEA_TOKEN_BID, OPENSEA_TRAIT_BID, queue, redis, trackBidRate } from "../..";
 import { config } from "dotenv";
 import { createBalanceChecker } from "../../utils/balance";
 import { Job } from "bullmq";
@@ -270,9 +270,14 @@ export async function bidOnOpensea(
 
     if (!itemSignature) return
 
+
+    // check if the tasks is still active before you make the offer
+    const [taskId, count] = bidCount.split(":")
+    const currentTask = activeTasks.get(taskId)
+    if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes("OPENSEA".toLowerCase())) return
+
     const itemResponse = await postItemOffer(offer, itemSignature, slug)
     const itemOrderHash = itemResponse?.order?.order_hash
-    const [taskId, count] = bidCount.split(":")
 
     const orderTrackingKey = `{${taskId}}:opensea:orders`;
     const orderKey = `{${taskId}}:${count}:opensea:order:${slug}:${asset.tokenId}`;
@@ -283,8 +288,8 @@ export async function bidOnOpensea(
     })
 
     await Promise.all([
-      redis.sadd(orderTrackingKey, orderKey),
       redis.setex(orderKey, expiry, order),
+      redis.sadd(orderTrackingKey, orderKey),
       redis.expire(orderTrackingKey, expiry)
     ]);
 
@@ -435,6 +440,8 @@ async function submitOfferToOpensea(slug: string, bidCount: string, offerPrice: 
   try {
 
     const [taskId, count] = bidCount.split(":")
+    const currentTask = activeTasks.get(taskId)
+    if (!currentTask?.running || !currentTask.selectedMarketplaces.map((marketplace) => marketplace.toLowerCase()).includes("OPENSEA".toLowerCase())) return
 
     const { data: offer } = await
       limiter.schedule(() => axiosInstance.request<OpenseaOffer>({
