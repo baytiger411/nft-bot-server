@@ -1,0 +1,74 @@
+implement this:
+
+Job Completion and Requeue:
+When a job (loop or counter bid) is completed, it is re-added to the queue.
+Re-added jobs have a delay based on their loop interval:
+0-minute interval: Ready for immediate execution.
+X-minute interval: Ready for execution after X minutes.
+
+Single Queue Structure:
+All jobs (loop bids and counter bids) are processed through a single BullMQ queue.
+Jobs are uniquely identified using attributes like contractAddress, nftId, or collection/trait offer details.
+
+Initial Loop Job Priority:
+The initial loop jobs are added with the same priority as counter bids to ensure fair processing when they first enter the queue.
+
+Counter Bid Jobs:
+Counter bid jobs arrive dynamically and have high priority initially.
+They can either:
+Update an existing job if it matches the unique identifier.
+Wait for the currently running job to complete before updating.
+
+Proportional Processing Allocation:
+Aim to maintain at least 10% of job processing time for loop jobs and 90% for counter bids.
+No need to pause or delay counter bid processing; instead, dynamically adjust job priorities to ensure loop jobs are executed within the allocation goal.
+
+Dynamic Priority Adjustment:
+Periodically (e.g., every 1 minute), adjust job priorities based on their waiting time:
+Older jobs waiting in the queue have their priority increased gradually.
+This prevents starvation of loop jobs while allowing counter bids to dominate the queue when necessary.
+Loop jobs’ priority is escalated faster if their processing allocation drops below the desired threshold.
+
+   Example Logic:
+   
+   setInterval(async () => {
+       const jobs = await bidQueue.getJobs(['waiting', 'delayed']);
+       for (const job of jobs) {
+           const ageInSeconds = (Date.now() - job.timestamp) / 1000;
+           if (job.name === 'loopBid') {
+               const newPriority = Math.max(1, Math.floor(10 - ageInSeconds / 60));
+               await job.update({
+                   ...job.data,
+                   priority: newPriority,
+               });
+           }
+       }
+   }, 60000); // Run every 1 minute
+   
+
+
+Requeue Completed Loop Jobs:
+Once a loop job completes, it is re-added with a delay based on the loop interval and a lower priority than counter bids.
+
+Processing Logic:
+Counter bids:
+Arrive dynamically and are processed immediately based on their higher initial priority.
+May update existing jobs in the queue or wait for running jobs to finish.
+Loop jobs:
+Initially processed at the same priority as counter bids.
+Requeued loop jobs start with lower priority but are dynamically escalated based on their waiting time and system allocation goals.
+
+Scalability:
+Supports high job volumes efficiently.
+Balances dynamic counter bids and recurring loop jobs through priority adjustment.
+
+make these adjustments
+loop jobs are: 
+MAGICEDEN_SCHEDULE, 
+OPENSEA_SCHEDULE,
+BLUR_SCHEDULE
+OPENSEA_TRAIT_BID,
+BLUR_TRAIT_BID, 
+MAGICEDEN_TRAIT_BID
+MAGICEDEN_TOKEN_BID
+OPENSEA_TOKEN_BID

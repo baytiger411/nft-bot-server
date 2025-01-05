@@ -1,0 +1,33 @@
+{
+  message: { errors: [ 'Order not valid or already filled or cancelled.' ] },
+  status: 400
+}
+{
+  message: { errors: [ 'Order not valid or already filled or cancelled.' ] },
+  status: 400
+}
+
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-541:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-541 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-541 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-540:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-540 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-540 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-539:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-539 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-539 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-538:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-538 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-538 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-537:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-537 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-537 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-536:  Error: Job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden-536 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da933
