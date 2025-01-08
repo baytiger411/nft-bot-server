@@ -416,15 +416,20 @@ export async function bidOnOpensea(
 
       await submitOfferToOpensea(slug, bidCount, offerPrice.toString(), payload, expiry, opensea_traits)
     } catch (error: any) {
-      console.log("opensea post offer error: ", error?.response?.data || error?.message || error);
-      if (!errorStats[taskId]) {
-        errorStats[taskId] = {
-          magiceden: 0,
-          opensea: 0,
-          blur: 0
+      // Skip logging for collection offers not supported error and duplicate orders
+      if (error?.response?.data?.message?.errors?.[0] !== 'Collection offers are not supported for this collection' &&
+        !error?.response?.data?.message?.errors?.includes('Duplicate order') &&
+        !error?.message?.errors?.includes('Duplicate order')) {
+        console.log("opensea post offer error: ", error?.response?.data || error?.message || error);
+        if (!errorStats[taskId]) {
+          errorStats[taskId] = {
+            magiceden: 0,
+            opensea: 0,
+            blur: 0
+          }
         }
+        errorStats[taskId]['opensea']++
       }
-      errorStats[taskId]['opensea']++
     }
   }
 };
@@ -500,7 +505,12 @@ async function submitOfferToOpensea(slug: string, bidCount: string, offerPrice: 
         await queue.resume()
       }
     } else {
-      console.log("opensea post offer error", error?.response?.data || error?.message || error);
+      const errorMessage = error?.response?.data || error?.message || error;
+      if (errorMessage?.message?.errors?.[0] === 'Collection offers are not supported for this collection') {
+        // Ignore this specific error
+        return;
+      }
+      console.log("opensea post offer error", errorMessage);
     }
     throw error
   }
@@ -532,6 +542,7 @@ async function buildOffer(buildPayload: any) {
 
 export async function cancelOrder(orderHash: string, protocolAddress: string, privateKey: string, taskId: string) {
   if (!orderHash || !protocolAddress || !privateKey) return
+
   const offererSignature = await signCancelOrder(orderHash, protocolAddress, privateKey);
 
   if (!offererSignature) {
@@ -552,11 +563,15 @@ export async function cancelOrder(orderHash: string, protocolAddress: string, pr
   try {
     const response = await limiter.schedule(() => axiosInstance.post(url, body, { headers }))
     console.log(JSON.stringify({ cancelled: true }));
-
     decrementBidCount('opensea', taskId)
     return response.data;
   } catch (error: any) {
-    console.log(error.response.data || error.message);
+    // Ignore "Order not valid" errors
+    if (error?.response?.data?.message?.errors?.[0] === 'Order not valid or already filled or cancelled.') {
+      decrementBidCount('opensea', taskId)
+      return;
+    }
+    console.log(error.response?.data || error.message);
   }
 }
 

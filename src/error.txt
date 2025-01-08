@@ -31,3 +31,1526 @@ Error processing job 677994d3d54cf2da93372d06-peplicator-by-matt-furie-magiceden
     at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
 Error details: Job 677994d3d54cf2da933
+
+sendDate: false,
+_removedConnection: false,
+_removedContLen: false,
+_removedTE: false,
+strictContentLength: false,
+_contentLength: 0,
+_hasBody: true,
+_trailer: '',
+finished: true,
+_headerSent: true,
+_closed: true,
+socket: [TLSSocket],
+_header: 'GET /magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:217&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false HTTP/1.1\r\n' +
+  'Accept: application/json, text/plain, */*\r\n' +
+  'Content-Type: application/json\r\n' +
+  'X-NFT-API-Key: d3348c68-097d-48b5-b5f0-0313cc05e92d\r\n' +
+  'User-Agent: axios/1.7.7\r\n' +
+  'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+  'Host: api.nfttools.website\r\n' +
+  'Connection: keep-alive\r\n' +
+  '\r\n',
+_keepAliveTimeout: 0,
+_onPendingData: [Function: nop],
+agent: [Agent],
+socketPath: undefined,
+method: 'GET',
+maxHeaderSize: undefined,
+insecureHTTPParser: undefined,
+joinDuplicateHeaders: undefined,
+path: '/magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:217&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false',
+_ended: true,
+res: [IncomingMessage],
+aborted: false,
+timeoutCb: null,
+upgradeOrConnect: false,
+parser: null,
+maxHeadersCount: null,
+reusedSocket: true,
+host: 'api.nfttools.website',
+protocol: 'https:',
+_redirectable: [Writable],
+[Symbol(kCapture)]: false,
+[Symbol(kBytesWritten)]: 0,
+[Symbol(kNeedDrain)]: false,
+[Symbol(corked)]: 0,
+[Symbol(kOutHeaders)]: [Object: null prototype],
+[Symbol(errored)]: null,
+[Symbol(kHighWaterMark)]: 16384,
+[Symbol(kRejectNonStandardBodyWrites)]: false,
+[Symbol(kUniqueHeaders)]: null
+},
+data: {
+message: '<html>\r\n' +
+  '<head><title>429 Too Many Requests</title></head>\r\n' +
+  '<body>\r\n' +
+  '<center><h1>429 Too Many Requests</h1></center>\r\n' +
+  "<p>We're sorry, but you have sent too many requests to NFTtools API in a short period of time. Please try again later.</p>\r\n" +
+  '</body>\r\n' +
+  '</html>\r\n',
+status: 429
+}
+},
+status: 429
+}
+Error processing MagicEden token bid for task: pudgypuppets  AxiosError: Request failed with status code 429
+at settle (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/settle.js:19:12)
+at IncomingMessage.handleStreamEnd (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/adapters/http.js:599:11)
+at IncomingMessage.emit (node:events:526:35)
+at IncomingMessage.emit (node:domain:488:12)
+at endReadableNT (node:internal/streams/readable:1408:12)
+at processTicksAndRejections (node:internal/process/task_queues:82:21)
+at Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:45:41)
+at processTicksAndRejections (node:internal/process/task_queues:95:5)
+at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+at Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:45:41)
+at processTicksAndRejections (node:internal/process/task_queues:95:5) {
+code: 'ERR_BAD_REQUEST',
+config: {
+transitional: {
+silentJSONParsing: true,
+forcedJSONParsing: true,
+clarifyTimeoutError: false
+},
+adapter: [ 'xhr', 'http', 'fetch' ],
+transformRequest: [ [Function (anonymous)] ],
+transformResponse: [ [Function: transformResponse] ],
+timeout: 294962,
+xsrfCookieName: 'XSRF-TOKEN',
+xsrfHeaderName: 'X-XSRF-TOKEN',
+maxContentLength: -1,
+maxBodyLength: -1,
+env: { FormData: [Function], Blob: [class Blob] },
+validateStatus: [Function: validateStatus],
+headers: Object [AxiosHeaders] {
+Accept: 'application/json, text/plain, */*',
+'Content-Type': 'application/json',
+'X-NFT-API-Key': 'd3348c68-097d-48b5-b5f0-0313cc05e92d',
+'User-Agent': 'axios/1.7.7',
+'Accept-Encoding': 'gzip, compress, deflate, br'
+},
+params: {
+token: '0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257',
+sortBy: 'price',
+status: 'active',
+excludeEOA: 'false',
+limit: '100',
+normalizeRoyalties: 'false'
+},
+method: 'get',
+url: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/orders/bids/v6',
+'axios-retry': {
+retries: 3,
+retryCondition: [Function: retryCondition],
+retryDelay: [Function: retryDelay],
+shouldResetTimeout: false,
+onRetry: [Function: onRetry],
+onMaxRetryTimesExceeded: [Function: onMaxRetryTimesExceeded],
+validateResponse: null,
+retryCount: 3,
+lastRequestTime: 1736117743209
+},
+data: undefined
+},
+request: <ref *1> ClientRequest {
+_events: [Object: null prototype] {
+abort: [Function (anonymous)],
+aborted: [Function (anonymous)],
+connect: [Function (anonymous)],
+error: [Function (anonymous)],
+socket: [Function (anonymous)],
+timeout: [Function (anonymous)],
+finish: [Function: requestOnFinish]
+},
+_eventsCount: 7,
+_maxListeners: undefined,
+outputData: [],
+outputSize: 0,
+writable: true,
+destroyed: true,
+_last: true,
+chunkedEncoding: false,
+shouldKeepAlive: true,
+maxRequestsOnConnectionReached: false,
+_defaultKeepAlive: true,
+useChunkedEncodingByDefault: false,
+sendDate: false,
+_removedConnection: false,
+_removedContLen: false,
+_removedTE: false,
+strictContentLength: false,
+_contentLength: 0,
+_hasBody: true,
+_trailer: '',
+finished: true,
+_headerSent: true,
+_closed: true,
+socket: TLSSocket {
+_tlsOptions: [Object],
+_secureEstablished: true,
+_securePending: false,
+_newSessionPending: false,
+_controlReleased: true,
+secureConnecting: false,
+_SNICallback: null,
+servername: 'api.nfttools.website',
+alpnProtocol: false,
+authorized: true,
+authorizationError: null,
+encrypted: true,
+_events: [Object: null prototype],
+_eventsCount: 11,
+connecting: false,
+_hadError: false,
+_parent: null,
+_host: 'api.nfttools.website',
+_closeAfterHandlingError: false,
+_readableState: [ReadableState],
+_maxListeners: undefined,
+_writableState: [WritableState],
+allowHalfOpen: false,
+_sockname: null,
+_pendingData: null,
+_pendingEncoding: '',
+server: undefined,
+_server: null,
+ssl: [TLSWrap],
+_requestCert: true,
+_rejectUnauthorized: true,
+timeout: 300000,
+parser: [HTTPParser],
+_httpMessage: [ClientRequest],
+[Symbol(alpncallback)]: null,
+[Symbol(res)]: [TLSWrap],
+[Symbol(verified)]: true,
+[Symbol(pendingSession)]: null,
+[Symbol(async_id_symbol)]: 1094471,
+[Symbol(kHandle)]: [TLSWrap],
+[Symbol(lastWriteQueueSize)]: 0,
+[Symbol(timeout)]: Timeout {
+  _idleTimeout: 300000,
+  _idlePrev: [TimersList],
+  _idleNext: [Timeout],
+  _idleStart: 383073,
+  _onTimeout: [Function: bound ],
+  _timerArgs: undefined,
+  _repeat: null,
+  _destroyed: false,
+  [Symbol(refed)]: false,
+  [Symbol(kHasPrimitive)]: false,
+  [Symbol(asyncId)]: 1094476,
+  [Symbol(triggerId)]: 1094472
+},
+[Symbol(kBuffer)]: null,
+[Symbol(kBufferCb)]: null,
+[Symbol(kBufferGen)]: null,
+[Symbol(kCapture)]: false,
+[Symbol(kSetNoDelay)]: false,
+[Symbol(kSetKeepAlive)]: true,
+[Symbol(kSetKeepAliveInitialDelay)]: 60,
+[Symbol(kBytesRead)]: 0,
+[Symbol(kBytesWritten)]: 0,
+[Symbol(connect-options)]: [Object]
+},
+_header: 'GET /magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false HTTP/1.1\r\n' +
+'Accept: application/json, text/plain, */*\r\n' +
+'Content-Type: application/json\r\n' +
+'X-NFT-API-Key: d3348c68-097d-48b5-b5f0-0313cc05e92d\r\n' +
+'User-Agent: axios/1.7.7\r\n' +
+'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+'Host: api.nfttools.website\r\n' +
+'Connection: keep-alive\r\n' +
+'\r\n',
+_keepAliveTimeout: 0,
+_onPendingData: [Function: nop],
+agent: Agent {
+_events: [Object: null prototype],
+_eventsCount: 2,
+_maxListeners: undefined,
+defaultPort: 443,
+protocol: 'https:',
+options: [Object: null prototype],
+requests: [Object: null prototype] {},
+sockets: [Object: null prototype],
+freeSockets: [Object: null prototype],
+keepAliveMsecs: 1000,
+keepAlive: true,
+maxSockets: Infinity,
+maxFreeSockets: 256,
+scheduling: 'lifo',
+maxTotalSockets: Infinity,
+totalSocketCount: 197,
+maxCachedSessions: 100,
+_sessionCache: [Object],
+[Symbol(kCapture)]: false
+},
+socketPath: undefined,
+method: 'GET',
+maxHeaderSize: undefined,
+insecureHTTPParser: undefined,
+joinDuplicateHeaders: undefined,
+path: '/magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false',
+_ended: true,
+res: IncomingMessage {
+_readableState: [ReadableState],
+_events: [Object: null prototype],
+_eventsCount: 4,
+_maxListeners: undefined,
+socket: null,
+httpVersionMajor: 1,
+httpVersionMinor: 1,
+httpVersion: '1.1',
+complete: true,
+rawHeaders: [Array],
+rawTrailers: [],
+joinDuplicateHeaders: undefined,
+aborted: false,
+upgrade: false,
+url: '',
+method: null,
+statusCode: 429,
+statusMessage: 'Too Many Requests',
+client: [TLSSocket],
+_consuming: false,
+_dumped: false,
+req: [Circular *1],
+responseUrl: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false',
+redirects: [],
+[Symbol(kCapture)]: false,
+[Symbol(kHeaders)]: [Object],
+[Symbol(kHeadersCount)]: 16,
+[Symbol(kTrailers)]: null,
+[Symbol(kTrailersCount)]: 0
+},
+aborted: false,
+timeoutCb: null,
+upgradeOrConnect: false,
+parser: null,
+maxHeadersCount: null,
+reusedSocket: true,
+host: 'api.nfttools.website',
+protocol: 'https:',
+_redirectable: Writable {
+_writableState: [WritableState],
+_events: [Object: null prototype],
+_eventsCount: 3,
+_maxListeners: undefined,
+_options: [Object],
+_ended: true,
+_ending: true,
+_redirectCount: 0,
+_redirects: [],
+_requestBodyLength: 0,
+_requestBodyBuffers: [],
+_onNativeResponse: [Function (anonymous)],
+_currentRequest: [Circular *1],
+_currentUrl: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false',
+_timeout: null,
+[Symbol(kCapture)]: false
+},
+[Symbol(kCapture)]: false,
+[Symbol(kBytesWritten)]: 0,
+[Symbol(kNeedDrain)]: false,
+[Symbol(corked)]: 0,
+[Symbol(kOutHeaders)]: [Object: null prototype] {
+accept: [Array],
+'content-type': [Array],
+'x-nft-api-key': [Array],
+'user-agent': [Array],
+'accept-encoding': [Array],
+host: [Array]
+},
+[Symbol(errored)]: null,
+[Symbol(kHighWaterMark)]: 16384,
+[Symbol(kRejectNonStandardBodyWrites)]: false,
+[Symbol(kUniqueHeaders)]: null
+},
+response: {
+status: 429,
+statusText: 'Too Many Requests',
+headers: Object [AxiosHeaders] {
+server: 'nginx/1.24.0 (Ubuntu)',
+date: 'Sun, 05 Jan 2025 22:55:43 GMT',
+'content-type': 'application/json; charset=utf-8',
+'content-length': '299',
+connection: 'keep-alive',
+'x-powered-by': 'Express',
+'access-control-allow-origin': '*',
+etag: 'W/"12b-hmjhnnWVgCd12j2z4HgK+2tSi78"'
+},
+config: {
+transitional: [Object],
+adapter: [Array],
+transformRequest: [Array],
+transformResponse: [Array],
+timeout: 294962,
+xsrfCookieName: 'XSRF-TOKEN',
+xsrfHeaderName: 'X-XSRF-TOKEN',
+maxContentLength: -1,
+maxBodyLength: -1,
+env: [Object],
+validateStatus: [Function: validateStatus],
+headers: [Object [AxiosHeaders]],
+params: [Object],
+method: 'get',
+url: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/orders/bids/v6',
+'axios-retry': [Object],
+data: undefined
+},
+request: <ref *1> ClientRequest {
+_events: [Object: null prototype],
+_eventsCount: 7,
+_maxListeners: undefined,
+outputData: [],
+outputSize: 0,
+writable: true,
+destroyed: true,
+_last: true,
+chunkedEncoding: false,
+shouldKeepAlive: true,
+maxRequestsOnConnectionReached: false,
+_defaultKeepAlive: true,
+useChunkedEncodingByDefault: false,
+sendDate: false,
+_removedConnection: false,
+_removedContLen: false,
+_removedTE: false,
+strictContentLength: false,
+_contentLength: 0,
+_hasBody: true,
+_trailer: '',
+finished: true,
+_headerSent: true,
+_closed: true,
+socket: [TLSSocket],
+_header: 'GET /magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false HTTP/1.1\r\n' +
+  'Accept: application/json, text/plain, */*\r\n' +
+  'Content-Type: application/json\r\n' +
+  'X-NFT-API-Key: d3348c68-097d-48b5-b5f0-0313cc05e92d\r\n' +
+  'User-Agent: axios/1.7.7\r\n' +
+  'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+  'Host: api.nfttools.website\r\n' +
+  'Connection: keep-alive\r\n' +
+  '\r\n',
+_keepAliveTimeout: 0,
+_onPendingData: [Function: nop],
+agent: [Agent],
+socketPath: undefined,
+method: 'GET',
+maxHeaderSize: undefined,
+insecureHTTPParser: undefined,
+joinDuplicateHeaders: undefined,
+path: '/magiceden/v3/rtp/ethereum/orders/bids/v6?token=0x49de69f69cd6c4bbb533083c234c5e1e80ca5465:257&sortBy=price&status=active&excludeEOA=false&limit=100&normalizeRoyalties=false',
+_ended: true,
+res: [IncomingMessage],
+aborted: false,
+timeoutCb: null,
+upgradeOrConnect: false,
+parser: null,
+maxHeadersCount: null,
+reusedSocket: true,
+host: 'api.nfttools.website',
+protocol: 'https:',
+_redirectable: [Writable],
+[Symbol(kCapture)]: false,
+[Symbol(kBytesWritten)]: 0,
+[Symbol(kNeedDrain)]: false,
+[Symbol(corked)]: 0,
+[Symbol(kOutHeaders)]: [Object: null prototype],
+[Symbol(errored)]: null,
+[Symbol(kHighWaterMark)]: 16384,
+[Symbol(kRejectNonStandardBodyWrites)]: false,
+[Symbol(kUniqueHeaders)]: null
+},
+data: {
+message: '<html>\r\n' +
+  '<head><title>429 Too Many Requests</title></head>\r\n' +
+  '<body>\r\n' +
+  '<center><h1>429 Too Many Requests</h1></center>\r\n' +
+  "<p>We're sorry, but you have sent too many requests to NFTtools API in a short period of time. Please try again later.</p>\r\n" +
+  '</body>\r\n' +
+  '</html>\r\n',
+status: 429
+}
+},
+status: 429
+}
+
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-19:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-19 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-19 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-1:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-1 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-1 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-22:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-22 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-22 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-9:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-9 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-9 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-15:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-15 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-15 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-24:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-24 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-24 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-6:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-6 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-6 could not be removed because it is locked by another worker
+Error processing job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-25:  Error: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-25 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677994d3d54cf2da93372d22-pxnghostdivision-magiceden-25 could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Purple Kanzashi:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Purple Kanzashi could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Purple Kanzashi could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Turquoise Kimono:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Turquoise Kimono could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Turquoise Kimono could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Ayaigasa:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Ayaigasa could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Ayaigasa could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog T-Shirt:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog T-Shirt could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog T-Shirt could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bangs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bangs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bangs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Hoodie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Hoodie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Hoodie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Pixie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Pixie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Pixie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Red:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Red could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Red could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Surprised:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Surprised could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Surprised could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Dreadlocks:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Dreadlocks could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Dreadlocks could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Yellow Bikini:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Yellow Bikini could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Yellow Bikini could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yin Yang:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yin Yang could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yin Yang could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Disheveled:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Disheveled could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Disheveled could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Kimono:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Kimono could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Kimono could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Bangs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Bangs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Bangs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Messy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Messy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Messy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White T-Shirt:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White T-Shirt could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White T-Shirt could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Newsboy Cap:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Newsboy Cap could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Newsboy Cap could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Baseball Cap:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Baseball Cap could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Baseball Cap could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Magenta Flowy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Magenta Flowy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Magenta Flowy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smoking:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smoking could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smoking could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Qipao:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Qipao could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Qipao could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Focused:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Focused could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Focused could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Laughing:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Laughing could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Laughing could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Spiked Ring:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Spiked Ring could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Spiked Ring could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Background-Red:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Background-Red could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Background-Red could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Suspicious:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Suspicious could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Suspicious could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Bob:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Bob could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Bob could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Round Blue Sunglasses:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Round Blue Sunglasses could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Round Blue Sunglasses could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Orange Bangs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Orange Bangs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Orange Bangs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Alpine Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Alpine Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Alpine Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Blue Cylinder:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Blue Cylinder could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Blue Cylinder could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Cat:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Cat could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Cat could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Beanie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Beanie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Beanie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Bomber:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Bomber could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Blue Bomber could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sandogasa:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sandogasa could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sandogasa could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sloth:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sloth could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sloth could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cowboy Hat:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cowboy Hat could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cowboy Hat could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Perfecto Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Perfecto Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Perfecto Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Small Hoop:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Small Hoop could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Small Hoop could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Reading Glasses:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Reading Glasses could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Reading Glasses could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Short Spiky:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Short Spiky could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Short Spiky could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Hoop:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Hoop could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Hoop could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Bomber:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Bomber could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Bomber could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Violet Flowy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Violet Flowy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Violet Flowy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Maroon Yukata:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Maroon Yukata could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Maroon Yukata could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Qipao with Fur:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Qipao with Fur could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Qipao with Fur could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Flowy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Flowy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Flowy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blonde Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Archer:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Archer could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Archer could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Tech Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Tech Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Tech Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Half Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Half Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Half Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Spiked Ring:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Spiked Ring could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Spiked Ring could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Teal Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Relaxed:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Relaxed could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Relaxed could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Buzzcut:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Buzzcut could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Buzzcut could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Powder Blue Pigtails:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Powder Blue Pigtails could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Powder Blue Pigtails could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Suikan:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Suikan could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Suikan could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Azuki Cap:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Azuki Cap could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Azuki Cap could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Mask:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Mask could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Mask could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kung Fu Shirt:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kung Fu Shirt could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kung Fu Shirt could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Pigtails:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Pigtails could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Pigtails could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Samurai:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Samurai could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Samurai could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Skull Ear Cuffs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Skull Ear Cuffs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Skull Ear Cuffs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Teal Bangs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Teal Bangs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Teal Bangs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Baseball Cap:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Baseball Cap could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Baseball Cap could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie with Bag:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie with Bag could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Hoodie with Bag could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Vegan Mink Coat:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Vegan Mink Coat could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Vegan Mink Coat could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Disheveled:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Disheveled could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Disheveled could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Pink Samurai:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Pink Samurai could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Pink Samurai could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Bandage Top:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Bandage Top could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Bandage Top could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Ninja Top:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Ninja Top could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Ninja Top could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Half Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Half Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Half Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Ponytail:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Ponytail could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Ponytail could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Red Panda Baseball Cap:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Red Panda Baseball Cap could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Red Panda Baseball Cap could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Wheat Straw:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Wheat Straw could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Wheat Straw could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Bandana:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Bandana could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Bandana could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Coin:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Coin could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Coin could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White Hoodie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White Hoodie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-White Hoodie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Pigtails:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Pigtails could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Pigtails could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Cylinder:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Cylinder could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Red Cylinder could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yellow Fan:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yellow Fan could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Yellow Fan could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Hairband:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Hairband could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Hairband could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-420:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-420 could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-420 could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Wu:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Wu could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Wu could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Bangs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Bangs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Bangs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Bored:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Bored could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Bored could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Fluffy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Fluffy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Indigo Fluffy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Perfecto Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Perfecto Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Black Perfecto Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ponytail:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ponytail could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ponytail could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Fur Hoodie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Fur Hoodie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Fur Hoodie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Fluffy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Fluffy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Maroon Fluffy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Spiky:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Spiky could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Purple Spiky could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Frog:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Frog could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Frog could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Dreadlocks:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Dreadlocks could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Dreadlocks could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Panda Yukata:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Panda Yukata could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Red Panda Yukata could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Growl:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Growl could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Growl could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Gray Samurai:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Gray Samurai could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Gray Samurai could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Black Bucket Hat:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Black Bucket Hat could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Black Bucket Hat could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Headband:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Headband could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Headband could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Careless:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Careless could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Careless could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Full Bandana:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Full Bandana could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Full Bandana could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Hoodie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Hoodie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Frog Hoodie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Pigtails:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Pigtails could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Pigtails could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sword:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sword could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Sword could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Ear Cuffs:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Ear Cuffs could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Ear Cuffs could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Denim Jacket:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Denim Jacket could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Denim Jacket could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Sloth Kimono:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Sloth Kimono could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Sloth Kimono could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Stripes Face Paint:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Stripes Face Paint could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Red Stripes Face Paint could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Ear-Square Stud:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Square Stud could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Ear-Square Stud could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Determined:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Determined could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Eyes-Determined could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Blonde Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Straw Hat:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Straw Hat could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Kimono with Straw Hat could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Plated Samurai Armor:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Plated Samurai Armor could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Plated Samurai Armor could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Green Yukata:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Green Yukata could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Clothing-Green Yukata could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Spiky:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Spiky could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Blue Spiky could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Ears:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Ears could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Cat Ears could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Swept Back:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Swept Back could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Swept Back could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Frown:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Frown could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Frown could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Pout:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Pout could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Pout could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Disheveled:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Disheveled could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Disheveled could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Hairband:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Hairband could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Silver Hairband could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smirk:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smirk could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Smirk could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Flowy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Flowy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Green Ombre Flowy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Blonde Half Bun:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Blonde Half Bun could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Black Blonde Half Bun could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Yellow Kanzashi:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Yellow Kanzashi could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Yellow Kanzashi could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Beanie:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Beanie could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Frog Beanie could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Long:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Long could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Long could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Stubble:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Stubble could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Mouth-Stubble could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Flowy:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Flowy could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Hair-Brown Flowy could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Headband:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Headband could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Headgear-Sloth Headband could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Bandaid:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Bandaid could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Bandaid could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Bokken:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Bokken could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Offhand-Bokken could not be removed because it is locked by another worker
+Error processing job 677ae226f3772e42d39b3504-azuki-blur-Face-Blue Sunglasses:  Error: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Blue Sunglasses could not be removed because it is locked by another worker
+    at Job.remove (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:604:13)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error details: Job 677ae226f3772e42d39b3504-azuki-blur-Face-Blue Sunglasses could not be removed because it is locked by another worker
+
+opensea post offer error:  {
+  message: {
+    errors: [ 'Collection offers are not supported for this collection' ]
+  },
+  status: 400
+}
+
+❌ Error processing OpenSea token bid for task: memoria-al  {
+  message: {
+    errors: [
+      'Duplicate order 0x54bfdd5ea9b564e08df6986923914a6d1365160604d99a01a504348f84ea494f'
+    ]
+  },
+  status: 400
+}
+
+
+
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-253. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-255. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-257. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-254. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-256. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house-magiceden-258. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d22-pxnghostdivision--collection-1736124737673. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d16-astrobot-society-by-token-metrics--collection-1736124737674. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d1a-saints-of-la--collection-1736124737674. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+Error: Missing lock for job 677994d3d54cf2da93372d26-nonon-house--collection-1736124737673. moveToDelayed
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1478:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+
+
+    Error: Lock mismatch for job 677994d3d54cf2da93372d06-peplicator-by-matt-furie--collection-1736124737674. Cmd moveToDelayed from active
+    at Scripts.finishedErrors (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/scripts.ts:1488:16)
+    at /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/job.ts:768:30
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async handleFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:875:30)
+    at async /Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:907:26
+    at async Worker.retryIfFailed (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/bullmq/src/classes/worker.ts:1175:16)
+
+
+    at settle (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/settle.js:19:12)
+    at IncomingMessage.handleStreamEnd (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/adapters/http.js:599:11)
+    at IncomingMessage.emit (node:events:526:35)
+    at IncomingMessage.emit (node:domain:488:12)
+    at endReadableNT (node:internal/streams/readable:1408:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+    at Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+    at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+    at async Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:40:14)
+    at Axios.request (/Users/titan/projects/nfttools/bidding-bot/server/node_modules/axios/lib/core/Axios.js:45:41)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  code: 'ERR_BAD_REQUEST',
+  config: {
+    transitional: {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    },
+    adapter: [ 'xhr', 'http', 'fetch' ],
+    transformRequest: [ [Function (anonymous)] ],
+    transformResponse: [ [Function: transformResponse] ],
+    timeout: 294589,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    env: { FormData: [Function], Blob: [class Blob] },
+    validateStatus: [Function: validateStatus],
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/json',
+      'X-NFT-API-Key': 'd3348c68-097d-48b5-b5f0-0313cc05e92d',
+      'User-Agent': 'axios/1.7.7',
+      'Content-Length': '947',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    },
+    method: 'post',
+    url: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+    data: '{"items":[{"order":{"kind":"payment-processor-v2","data":{"kind":"collection-offer-approval","sellerOrBuyer":"0x1b8afd0de8a9368ce635be8b9572c65d8f590b21","protocol":0,"cosigner":"0x32da57e736e05f75aa4fae2e9be60fd904492726","beneficiary":"0x1b8afd0de8a9368ce635be8b9572c65d8f590b21","marketplace":"0x6fa303e72bed54f515a513496f922bc331e2f27e","fallbackRoyaltyRecipient":"0xe0cb4eece898456b33ae9bc4042a64bdd86b3654","paymentMethod":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","tokenAddress":"0x203393330560cf43893ae7051d1b787844f13080","amount":"1","itemPrice":"10000000000000000","expiration":"1736126555","marketplaceFeeNumerator":"200","nonce":"22564310636789171266195882423449641451749927409753116568871393140423805370451","masterNonce":"0","r":"0x0000000000000000000000000000000000000000000000000000000000000000","s":"0x0000000000000000000000000000000000000000000000000000000000000000","v":0}},"orderbook":"reservoir"}],"source":"magiceden.us"}',
+    'axios-retry': {
+      retries: 3,
+      retryCondition: [Function: retryCondition],
+      retryDelay: [Function: retryDelay],
+      shouldResetTimeout: false,
+      onRetry: [Function: onRetry],
+      onMaxRetryTimesExceeded: [Function: onMaxRetryTimesExceeded],
+      validateResponse: null,
+      retryCount: 3,
+      lastRequestTime: 1736125665645
+    }
+  },
+  request: <ref *1> ClientRequest {
+    _events: [Object: null prototype] {
+      abort: [Function (anonymous)],
+      aborted: [Function (anonymous)],
+      connect: [Function (anonymous)],
+      error: [Function (anonymous)],
+      socket: [Function (anonymous)],
+      timeout: [Function (anonymous)],
+      finish: [Function: requestOnFinish]
+    },
+    _eventsCount: 7,
+    _maxListeners: undefined,
+    outputData: [],
+    outputSize: 0,
+    writable: true,
+    destroyed: true,
+    _last: false,
+    chunkedEncoding: false,
+    shouldKeepAlive: true,
+    maxRequestsOnConnectionReached: false,
+    _defaultKeepAlive: true,
+    useChunkedEncodingByDefault: true,
+    sendDate: false,
+    _removedConnection: false,
+    _removedContLen: false,
+    _removedTE: false,
+    strictContentLength: false,
+    _contentLength: '947',
+    _hasBody: true,
+    _trailer: '',
+    finished: true,
+    _headerSent: true,
+    _closed: true,
+    socket: TLSSocket {
+      _tlsOptions: [Object],
+      _secureEstablished: true,
+      _securePending: false,
+      _newSessionPending: false,
+      _controlReleased: true,
+      secureConnecting: false,
+      _SNICallback: null,
+      servername: 'api.nfttools.website',
+      alpnProtocol: false,
+      authorized: true,
+      authorizationError: null,
+      encrypted: true,
+      _events: [Object: null prototype],
+      _eventsCount: 11,
+      connecting: false,
+      _hadError: false,
+      _parent: null,
+      _host: 'api.nfttools.website',
+      _closeAfterHandlingError: false,
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      _writableState: [WritableState],
+      allowHalfOpen: false,
+      _sockname: null,
+      _pendingData: null,
+      _pendingEncoding: '',
+      server: undefined,
+      _server: null,
+      ssl: [TLSWrap],
+      _requestCert: true,
+      _rejectUnauthorized: true,
+      timeout: 300000,
+      parser: [HTTPParser],
+      _httpMessage: [ClientRequest],
+      [Symbol(alpncallback)]: null,
+      [Symbol(res)]: [TLSWrap],
+      [Symbol(verified)]: true,
+      [Symbol(pendingSession)]: null,
+      [Symbol(async_id_symbol)]: 26886,
+      [Symbol(kHandle)]: [TLSWrap],
+      [Symbol(lastWriteQueueSize)]: 829,
+      [Symbol(timeout)]: Timeout {
+        _idleTimeout: 300000,
+        _idlePrev: [TimersList],
+        _idleNext: [Timeout],
+        _idleStart: 157690,
+        _onTimeout: [Function: bound ],
+        _timerArgs: undefined,
+        _repeat: null,
+        _destroyed: false,
+        [Symbol(refed)]: false,
+        [Symbol(kHasPrimitive)]: false,
+        [Symbol(asyncId)]: 26891,
+        [Symbol(triggerId)]: 26887
+      },
+      [Symbol(kBuffer)]: null,
+      [Symbol(kBufferCb)]: null,
+      [Symbol(kBufferGen)]: null,
+      [Symbol(kCapture)]: false,
+      [Symbol(kSetNoDelay)]: false,
+      [Symbol(kSetKeepAlive)]: true,
+      [Symbol(kSetKeepAliveInitialDelay)]: 60,
+      [Symbol(kBytesRead)]: 0,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(connect-options)]: [Object]
+    },
+    _header: 'POST /magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c HTTP/1.1\r\n' +
+      'Accept: application/json, text/plain, */*\r\n' +
+      'Content-Type: application/json\r\n' +
+      'X-NFT-API-Key: d3348c68-097d-48b5-b5f0-0313cc05e92d\r\n' +
+      'User-Agent: axios/1.7.7\r\n' +
+      'Content-Length: 947\r\n' +
+      'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+      'Host: api.nfttools.website\r\n' +
+      'Connection: keep-alive\r\n' +
+      '\r\n',
+    _keepAliveTimeout: 0,
+    _onPendingData: [Function: nop],
+    agent: Agent {
+      _events: [Object: null prototype],
+      _eventsCount: 2,
+      _maxListeners: undefined,
+      defaultPort: 443,
+      protocol: 'https:',
+      options: [Object: null prototype],
+      requests: [Object: null prototype] {},
+      sockets: [Object: null prototype],
+      freeSockets: [Object: null prototype],
+      keepAliveMsecs: 1000,
+      keepAlive: true,
+      maxSockets: Infinity,
+      maxFreeSockets: 256,
+      scheduling: 'lifo',
+      maxTotalSockets: Infinity,
+      totalSocketCount: 62,
+      maxCachedSessions: 100,
+      _sessionCache: [Object],
+      [Symbol(kCapture)]: false
+    },
+    socketPath: undefined,
+    method: 'POST',
+    maxHeaderSize: undefined,
+    insecureHTTPParser: undefined,
+    joinDuplicateHeaders: undefined,
+    path: '/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+    _ended: true,
+    res: IncomingMessage {
+      _readableState: [ReadableState],
+      _events: [Object: null prototype],
+      _eventsCount: 4,
+      _maxListeners: undefined,
+      socket: null,
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: undefined,
+      aborted: false,
+      upgrade: false,
+      url: '',
+      method: null,
+      statusCode: 400,
+      statusMessage: 'Bad Request',
+      client: [TLSSocket],
+      _consuming: false,
+      _dumped: false,
+      req: [Circular *1],
+      responseUrl: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+      redirects: [],
+      [Symbol(kCapture)]: false,
+      [Symbol(kHeaders)]: [Object],
+      [Symbol(kHeadersCount)]: 16,
+      [Symbol(kTrailers)]: null,
+      [Symbol(kTrailersCount)]: 0
+    },
+    aborted: false,
+    timeoutCb: null,
+    upgradeOrConnect: false,
+    parser: null,
+    maxHeadersCount: null,
+    reusedSocket: true,
+    host: 'api.nfttools.website',
+    protocol: 'https:',
+    _redirectable: Writable {
+      _writableState: [WritableState],
+      _events: [Object: null prototype],
+      _eventsCount: 3,
+      _maxListeners: undefined,
+      _options: [Object],
+      _ended: true,
+      _ending: true,
+      _redirectCount: 0,
+      _redirects: [],
+      _requestBodyLength: 947,
+      _requestBodyBuffers: [],
+      _onNativeResponse: [Function (anonymous)],
+      _currentRequest: [Circular *1],
+      _currentUrl: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+      _timeout: null,
+      [Symbol(kCapture)]: false
+    },
+    [Symbol(kCapture)]: false,
+    [Symbol(kBytesWritten)]: 0,
+    [Symbol(kNeedDrain)]: false,
+    [Symbol(corked)]: 0,
+    [Symbol(kOutHeaders)]: [Object: null prototype] {
+      accept: [Array],
+      'content-type': [Array],
+      'x-nft-api-key': [Array],
+      'user-agent': [Array],
+      'content-length': [Array],
+      'accept-encoding': [Array],
+      host: [Array]
+    },
+    [Symbol(errored)]: null,
+    [Symbol(kHighWaterMark)]: 16384,
+    [Symbol(kRejectNonStandardBodyWrites)]: false,
+    [Symbol(kUniqueHeaders)]: null
+  },
+  response: {
+    status: 400,
+    statusText: 'Bad Request',
+    headers: Object [AxiosHeaders] {
+      server: 'nginx/1.24.0 (Ubuntu)',
+      date: 'Mon, 06 Jan 2025 01:07:46 GMT',
+      'content-type': 'application/json; charset=utf-8',
+      'content-length': '121',
+      connection: 'keep-alive',
+      'x-powered-by': 'Express',
+      'access-control-allow-origin': '*',
+      etag: 'W/"79-/hw9eBspPgppP/jfPwgbjEK0zv8"'
+    },
+    config: {
+      transitional: [Object],
+      adapter: [Array],
+      transformRequest: [Array],
+      transformResponse: [Array],
+      timeout: 294589,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: [Object],
+      validateStatus: [Function: validateStatus],
+      headers: [Object [AxiosHeaders]],
+      method: 'post',
+      url: 'https://api.nfttools.website/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+      data: '{"items":[{"order":{"kind":"payment-processor-v2","data":{"kind":"collection-offer-approval","sellerOrBuyer":"0x1b8afd0de8a9368ce635be8b9572c65d8f590b21","protocol":0,"cosigner":"0x32da57e736e05f75aa4fae2e9be60fd904492726","beneficiary":"0x1b8afd0de8a9368ce635be8b9572c65d8f590b21","marketplace":"0x6fa303e72bed54f515a513496f922bc331e2f27e","fallbackRoyaltyRecipient":"0xe0cb4eece898456b33ae9bc4042a64bdd86b3654","paymentMethod":"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2","tokenAddress":"0x203393330560cf43893ae7051d1b787844f13080","amount":"1","itemPrice":"10000000000000000","expiration":"1736126555","marketplaceFeeNumerator":"200","nonce":"22564310636789171266195882423449641451749927409753116568871393140423805370451","masterNonce":"0","r":"0x0000000000000000000000000000000000000000000000000000000000000000","s":"0x0000000000000000000000000000000000000000000000000000000000000000","v":0}},"orderbook":"reservoir"}],"source":"magiceden.us"}',
+      'axios-retry': [Object]
+    },
+    request: <ref *1> ClientRequest {
+      _events: [Object: null prototype],
+      _eventsCount: 7,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: true,
+      _last: false,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: true,
+      sendDate: false,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: '947',
+      _hasBody: true,
+      _trailer: '',
+      finished: true,
+      _headerSent: true,
+      _closed: true,
+      socket: [TLSSocket],
+      _header: 'POST /magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c HTTP/1.1\r\n' +
+        'Accept: application/json, text/plain, */*\r\n' +
+        'Content-Type: application/json\r\n' +
+        'X-NFT-API-Key: d3348c68-097d-48b5-b5f0-0313cc05e92d\r\n' +
+        'User-Agent: axios/1.7.7\r\n' +
+        'Content-Length: 947\r\n' +
+        'Accept-Encoding: gzip, compress, deflate, br\r\n' +
+        'Host: api.nfttools.website\r\n' +
+        'Connection: keep-alive\r\n' +
+        '\r\n',
+      _keepAliveTimeout: 0,
+      _onPendingData: [Function: nop],
+      agent: [Agent],
+      socketPath: undefined,
+      method: 'POST',
+      maxHeaderSize: undefined,
+      insecureHTTPParser: undefined,
+      joinDuplicateHeaders: undefined,
+      path: '/magiceden/v3/rtp/ethereum/order/v4?signature=0xdaf2bc8f3c2c2701944363986c83b145ec68cd56f3cf3e8c61b46938dd7b910351f22b9b8774335356537deb59bba65d8515f593e439f5ce154f54f699c5eef51c',
+      _ended: true,
+      res: [IncomingMessage],
+      aborted: false,
+      timeoutCb: null,
+      upgradeOrConnect: false,
+      parser: null,
+      maxHeadersCount: null,
+      reusedSocket: true,
+      host: 'api.nfttools.website',
+      protocol: 'https:',
+      _redirectable: [Writable],
+      [Symbol(kCapture)]: false,
+      [Symbol(kBytesWritten)]: 0,
+      [Symbol(kNeedDrain)]: false,
+      [Symbol(corked)]: 0,
+      [Symbol(kOutHeaders)]: [Object: null prototype],
+      [Symbol(errored)]: null,
+      [Symbol(kHighWaterMark)]: 16384,
+      [Symbol(kRejectNonStandardBodyWrites)]: false,
+      [Symbol(kUniqueHeaders)]: null
+    },
+    data: { message: [Object], status: 400 }
+  },
+  status: 400
+}
+
+❌ Error processing OpenSea token bid for task: saints-of-la  {
+message: {
+errors: [
+  'Duplicate order 0xdf2125e5f3eec469be6eb4b6efa545fdb902ee0b5aae9c039917435158597bbd'
+]
+},
+status: 4

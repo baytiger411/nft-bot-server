@@ -2,11 +2,15 @@ import { ethers } from "ethers";
 import { Cluster } from 'ioredis';
 import { DistributedLockManager } from './lock';
 import RedisClient from './redis';
+import { formatEther, Interface } from "ethers/lib/utils";
+import { axiosInstance, limiter } from "../init";
 
 // Constants
 const CACHE_EXPIRY_SECONDS = 60;
 const BLUR_POOL_ADDRESS = "0x0000000000A39bb272e79075ade125fd351887Ac";
 const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+const API_ENDPOINT = "https://nfttools.pro";
+const API_KEY = "a4eae399-f135-4627-829a-18435bb631ae";
 
 // Environment configuration
 const config = {
@@ -66,35 +70,47 @@ class BalanceChecker {
     const result = await this.lockManager.withLock(
       `weth_${address}`,
       async () => {
-        // Check cache again after acquiring lock
         const cachedBalanceAfterLock = await this.getCachedBalance(cacheKey);
         if (cachedBalanceAfterLock !== null) {
           return cachedBalanceAfterLock;
         }
 
-        const wethContract = new ethers.Contract(
-          WETH_ADDRESS,
-          ['function balanceOf(address) view returns (uint256)'],
-          this.deps.provider
-        );
+        try {
+          // Common headers for request
+          const headers = {
+            url: "https://ethereum.publicnode.com",
+            "x-nft-api-key": API_KEY,
+            "Content-Type": "application/json",
+          };
 
-        // Retry logic with exponential backoff
-        const maxRetries = 3;
-        for (let attempt = 0; attempt <= maxRetries; attempt++) {
-          try {
-            const balance = await wethContract.balanceOf(address);
-            const formattedBalance = Number(ethers.utils.formatEther(balance));
+          // WETH Balance Request
+          const wethData = new Interface([
+            "function balanceOf(address owner) view returns (uint256)",
+          ]).encodeFunctionData("balanceOf", [address]);
 
-            await this.setCachedBalance(cacheKey, formattedBalance);
-            return formattedBalance;
-          } catch (error) {
-            if (attempt === maxRetries) {
-              console.error("Error fetching WETH balance after retries:", error);
-              return cachedBalance ?? 0;
-            }
-            const backoffTime = Math.pow(2, attempt) * 1000;
-            await new Promise(resolve => setTimeout(resolve, backoffTime));
-          }
+          const wethBalanceRequest = {
+            jsonrpc: "2.0",
+            method: "eth_call",
+            params: [
+              {
+                to: WETH_ADDRESS,
+                data: wethData,
+              },
+              "latest",
+            ],
+            id: 2,
+          };
+
+          const response = await limiter.schedule(() => axiosInstance.post(API_ENDPOINT, wethBalanceRequest, { headers }));
+          const balance = response.data.result;
+          const formattedBalance = Number(formatEther(balance));
+
+          await this.setCachedBalance(cacheKey, formattedBalance);
+          return formattedBalance;
+
+        } catch (error) {
+          console.error("Error fetching WETH balance:", error);
+          return cachedBalance ?? 0;
         }
       }
     );
